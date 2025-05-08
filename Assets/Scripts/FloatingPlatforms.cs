@@ -63,6 +63,8 @@ public class FloatingPlatforms : MonoBehaviour
     {
         velocity = (transform.position - lastpos) / Time.deltaTime;
         lastpos = transform.position;
+
+        Debug.Log("Platform speeed" + speed);
     }
 
     #region BasicMovements
@@ -89,6 +91,27 @@ public class FloatingPlatforms : MonoBehaviour
 
     }
 
+    IEnumerator movePlatformVertically(Transform platform, Vector3 endpos, float duration)
+    {
+        canMove = false;
+        Vector3 startpos = transform.position;
+
+        float elapsed = 0f;
+        Vector3 previousPos = platform.position;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            platform.position = Vector3.Lerp(startpos, endpos, t);
+
+            previousPos = platform.position;
+            yield return null;
+        }
+
+        IsMoving = false;
+
+    }
 
     IEnumerator movePlatformHorizontally(Transform platform, float dx, float duration) 
     {
@@ -210,7 +233,7 @@ public class FloatingPlatforms : MonoBehaviour
         if (!moveOnTouch) return;
         if(collision.collider.CompareTag("Player"))
         {
-            StartCoroutine(movePlatformVertically(platform, verticalChange, duration));
+            StartCoroutine(movePlatformVertically(platform, new Vector3(transform.position.x, verticalChange, transform.position.z), duration)); // test dis
 
         }
     }
