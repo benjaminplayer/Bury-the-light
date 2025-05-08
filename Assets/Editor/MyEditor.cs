@@ -23,7 +23,6 @@ public class MyEditor : Editor
         SerializedProperty IsMoving = serializedObject.FindProperty("IsMoving");
         SerializedProperty canMove = serializedObject.FindProperty("canMove");
         SerializedProperty isContinous = serializedObject.FindProperty("isContinous");
-        SerializedProperty moveTo = serializedObject.FindProperty("moveTo");
         #endregion
         // Draw all properties
         EditorGUILayout.PropertyField(platformProp);
@@ -51,8 +50,6 @@ public class MyEditor : Editor
                 EditorGUILayout.PropertyField(verticalSpeedProp);
 
         }
-
-        EditorGUILayout.PropertyField(moveTo);
 
         EditorGUILayout.PropertyField(duration);
 
