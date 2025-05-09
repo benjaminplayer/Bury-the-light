@@ -52,6 +52,7 @@ public class CharacterController : MonoBehaviour
 
     [SerializeField]
     private Vector2 moveInput;
+    
 
     #region Player Actions
     public bool IsFacingRight { get; private set; }
@@ -381,6 +382,12 @@ public class CharacterController : MonoBehaviour
             OnHit();
         }
 
+        if (collision.collider.CompareTag("Spikes"))
+        {
+            OnHit();
+        }
+
+
 
     }
 
@@ -392,6 +399,19 @@ public class CharacterController : MonoBehaviour
             Debug.Log("collision with rock wall");
             rb.linearVelocity = new Vector2(0f, rb.linearVelocityY);
         }
+
+        if (collision.gameObject.layer == 7) // Premakni v OnTriggerStay2D
+        {
+            Debug.Log("Staying In Collision");
+
+            if (Input.GetKeyDown(KeyCode.E)) 
+            { 
+                Usable us = collision.gameObject.GetComponent<Usable>();
+                us.triggerPlatformMovement();
+            
+            }
+        }
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
