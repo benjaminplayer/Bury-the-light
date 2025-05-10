@@ -31,7 +31,6 @@ public class CharacterController : MonoBehaviour
 
 
     public float platformVel;
-    public bool isOnMovingPlatform;
     #endregion
 
     private Vector3 startingPos = new Vector3(-38.14f, -14.605f, 0.01886861f);
@@ -64,6 +63,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField]
     private bool _isAlive = true;
     public bool canMove = true;
+    private Collider2D usableInTrigger;
 
     #region Timers init
     public float LastOnGroundTime { get; private set; }
@@ -92,6 +92,9 @@ public class CharacterController : MonoBehaviour
     private Rigidbody2D rb;
     Animator animator;
     private Collider2D platformHit;
+
+    private bool _Resetable;
+
     private void Awake()
     {
         startPos();
@@ -121,6 +124,16 @@ public class CharacterController : MonoBehaviour
 
         #region Input
         moveInput.x = canMove ? Input.GetAxisRaw("Horizontal") : 0;
+
+        if (usableInTrigger != null && Input.GetKeyDown(KeyCode.E))
+        {
+            Usable us = usableInTrigger.gameObject.GetComponent<Usable>();
+            
+            if(us != null)
+                us.triggerPlatformMovement();
+
+        }
+
         #endregion
 
         if (moveInput.x != 0)
@@ -147,13 +160,11 @@ public class CharacterController : MonoBehaviour
                 animator.SetBool("isGrounded", false);
             }
 
-            Debug.Log(platformHit);
+            //Debug.Log(platformHit);
 
             if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
             {
                 //player.transform.SetParent(platform);
-                isOnMovingPlatform = true;
-                Debug.Log("Platform");
                 transform.SetParent(platformHit.transform);
             }
 
@@ -192,7 +203,7 @@ public class CharacterController : MonoBehaviour
         }
         else if ((IsJumping) && Mathf.Abs(rb.linearVelocityY) < 0.1)
         {
-            Debug.Log(rb.linearVelocityY);
+            //Debug.Log(rb.linearVelocityY);
             setGravityScale(gravityScale * reduceGravityMult);
         }
         else
@@ -300,13 +311,8 @@ public class CharacterController : MonoBehaviour
         if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
         {
             platformVel = platformHit.GetComponent<FloatingPlatforms>().speed;
-            Debug.Log("Platform vel:" + platformVel);
+            //Debug.Log("Platform vel:" + platformVel);
             transform.SetParent(null);
-            isOnMovingPlatform = false;
-        }
-
-        if (isOnMovingPlatform)
-        {
             force += platformVel;
         }
 
@@ -314,6 +320,7 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isGrounded", false);
         animator.SetTrigger("jump");
         #endregion
+        Debug.Log("Character jump force: " + force);
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse); // Doda force na rb v vertikalo
         #endregion
     }
@@ -400,18 +407,6 @@ public class CharacterController : MonoBehaviour
             rb.linearVelocity = new Vector2(0f, rb.linearVelocityY);
         }
 
-        if (collision.gameObject.layer == 7) // Premakni v OnTriggerStay2D
-        {
-            Debug.Log("Staying In Collision");
-
-            if (Input.GetKeyDown(KeyCode.E)) 
-            { 
-                Usable us = collision.gameObject.GetComponent<Usable>();
-                us.triggerPlatformMovement();
-            
-            }
-        }
-
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -424,11 +419,48 @@ public class CharacterController : MonoBehaviour
             StartCoroutine(cc.ZoomCamera(10f, 1f));
         }
 
+        if (collision.CompareTag("GeneralCamReset") && _Resetable) 
+        {
+            CameraController cc = Camera.main.GetComponent<CameraController>();
+            cc.SetFollowCamX(false);
+            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(222.3279f, -15f, Camera.main.transform.position.z), 1f));
+            StartCoroutine(cc.ZoomCamera(10f, 1f));
+            CameraController.IsEndOfLevel = false;
+
+            _Resetable = false;
+        }
+
         if (collision.CompareTag("RemoveCamMovement"))
         {
             CameraController.IsEndOfLevel = true;
         }
 
+        if (collision.CompareTag("TriggerFollowCam"))
+        {
+            CameraController.IsEndOfLevel = true;
+            CameraController cc = Camera.main.GetComponent<CameraController>();
+            cc.SetOffsetY(2f);
+            StartCoroutine(cc.ZoomCamera(3.67f, 0.2f));
+            cc.SetFollowCamX(true);
+            _Resetable = true;
+        }
+
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 7) // Premakni v OnTriggerStay2D
+        {
+            Debug.Log("Staying In Collision");
+            usableInTrigger = collision;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision == usableInTrigger)
+            usableInTrigger = null;
+    }
+
 
 }

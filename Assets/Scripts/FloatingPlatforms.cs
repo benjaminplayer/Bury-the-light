@@ -49,7 +49,7 @@ public class FloatingPlatforms : MonoBehaviour
     private void Awake()
     {
 
-        Debug.Log("Start pos: " + _startPos);
+        //Debug.Log("Start pos: " + _startPos);
 
         lastpos = transform.position;
 
@@ -67,8 +67,11 @@ public class FloatingPlatforms : MonoBehaviour
 
     private void Update()
     {
-        velocity = (transform.position - lastpos) / Time.deltaTime;
-        lastpos = transform.position;
+        if (verticalMovement)
+        { 
+            velocity = (transform.position - lastpos) / Time.deltaTime;
+            lastpos = transform.position;
+        }
     }
 
     #region BasicMovements
@@ -90,8 +93,6 @@ public class FloatingPlatforms : MonoBehaviour
             yield return null;
         }
 
-        IsMoving = false;
-
     }
 
     private IEnumerator MovePlatformHorizontally(Transform platform, Vector3 endpos, float duration)
@@ -108,7 +109,6 @@ public class FloatingPlatforms : MonoBehaviour
 
             yield return null;
         }
-        IsMoving = false;
 
     }
     #endregion
@@ -166,9 +166,10 @@ public class FloatingPlatforms : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!moveOnTouch) return;
-        if (collision.collider.CompareTag("Player"))
-        { 
-            StartCoroutine(Movement(platform, new Vector3(transform.position.x, verticalChange, transform.position.z), duration)); // test dis
+        if (collision.collider.CompareTag("Player") && !IsMoving)
+        {
+            Debug.Log(GetArgs());
+            StartCoroutine(Movement()); // test dis
         }
     }
 
@@ -182,27 +183,54 @@ public class FloatingPlatforms : MonoBehaviour
 
     #endregion
 
-    public IEnumerator Movement(Transform platform, Vector3 endPos, float duration) // trigger movement in pole vrni platform na originalen position
+    public IEnumerator Movement() // trigger movement in pole vrni platform na originalen position
     {
+        _startPos = transform.position;
+        
         if (verticalMovement)
-            yield return StartCoroutine(movePlatformVertically(platform, endPos, duration));
+        {
+            IsMoving = true;
+            yield return StartCoroutine(movePlatformVertically(platform, transform.position + new Vector3(0, verticalChange), duration));
+        }
         else if(horizontalMovement)
-            yield return StartCoroutine(MovePlatformHorizontally(platform, transform.position + new Vector3(horizontalChange,0), duration));
+            yield return StartCoroutine(MovePlatformHorizontally(platform, transform.position + new Vector3(horizontalChange, 0), duration));
         yield return ResetPosition();
+        IsMoving = false;
     }
 
+    #region SetterMethods
     public void SetMovementDir(string dir)
     {
-        if (dir.ToLower() == "Hoizontal")
+        if (dir.ToLower() == "horizontal")
         {
             verticalMovement = false;
            horizontalMovement = true;
         }
-        else if (dir.ToLower() == "Vertical")
+        else if (dir.ToLower() == "vertical")
         {
             horizontalMovement = false;
             verticalMovement = true;
         }
     }
 
+    public void SetHorizontalChange(float change)
+    { 
+        this.horizontalChange = change;
+    }
+
+    public void SetDuration(float duration)
+    {
+        this.duration = duration;
+    }
+
+    public float GetDuration()
+    { 
+        return this.duration;
+    }
+
+    public string GetArgs()
+    {
+        return "Veritcal change" + this.verticalChange +" horizontal chage: "+this.horizontalChange+", currentPos: "+transform.position;
+    }
+    #endregion
 }

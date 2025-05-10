@@ -24,6 +24,7 @@ public class CameraController : MonoBehaviour
     private BoxCollider2D LeftCollider;
     private BoxCollider2D RightCollider;
     [SerializeField] private BoxCollider2D BottomCollider;
+    [SerializeField] private BoxCollider2D TopCollider;
     public Vector2 entryPos;
     [SerializeField] private bool _useStartPos = true;
     [SerializeField] private Vector3 startPos;
@@ -32,6 +33,7 @@ public class CameraController : MonoBehaviour
     #region FollowCamAttributes
 
     public bool FollowPlayer;
+    private bool FollowPlayerX;
     public float camOffsetX = 0;
     public float camOffsetY = 0;
     public Vector3 camOffset;
@@ -40,6 +42,7 @@ public class CameraController : MonoBehaviour
     private float cameraWidth;
 
     public static bool IsEndOfLevel = false;
+    private float cameraHeight;
 
     private void Awake()
     {
@@ -49,13 +52,13 @@ public class CameraController : MonoBehaviour
         RightCollider = RightTrigger.GetComponent<BoxCollider2D>();
 
         Camera cam = camera.GetComponentInParent<Camera>();
-        float cameraHeight = cam.orthographicSize * 2f;
+        cameraHeight = cam.orthographicSize * 2f;
 
         cameraWidth = cameraHeight * Screen.width / Screen.height;
 
         moveOffset = cameraWidth;
 
-        Debug.Log(cameraWidth);
+        //Debug.Log(cameraWidth);
 
     }
 
@@ -67,6 +70,13 @@ public class CameraController : MonoBehaviour
             Camera.main.transform.position = new Vector3(playerPos.x + camOffsetX, playerPos.y + camOffsetY, -0.3f) + camOffset;
 
         }
+
+        if (FollowPlayerX)
+        { 
+            Vector2 pos = player.transform.position;
+            transform.position = new Vector3(pos.x, transform.position.y, -.3f); 
+        }
+
     }
 
 
@@ -106,6 +116,11 @@ public class CameraController : MonoBehaviour
                 collision.gameObject.transform.position = entryPos;
             }
 
+            if (collision.IsTouching(TopCollider))
+            {
+                MoveCameraUp();
+            }
+
         }
     }
 
@@ -119,6 +134,12 @@ public class CameraController : MonoBehaviour
     {
         Vector3 endPos = new Vector3(camera.position.x - moveOffset, camera.position.y, camera.position.z);
         StartCoroutine(moveCamera(camera.position, endPos, duration));
+    }
+
+    private void MoveCameraUp() 
+    {
+        Vector3 endPos = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y + cameraHeight, Camera.main.transform.position.z);
+        StartCoroutine(moveCamera(Camera.main.transform.position, endPos, duration));
     }
 
     public IEnumerator moveCamera(Vector3 startPos, Vector3 endPos, float duration)
@@ -151,7 +172,18 @@ public class CameraController : MonoBehaviour
 
     public void SetFollowCam(bool b)
     {
+        if (FollowPlayerX && b)
+            FollowPlayerX = false;
         FollowPlayer = b;
+
+    }
+
+    public void SetFollowCamX(bool b) 
+    {
+        if (FollowPlayer && b)
+            FollowPlayer = false;
+        transform.position = new Vector3(transform.position.x, -19.21f, -.3f);
+        FollowPlayerX = b;
     }
 
     public void SetOffsets(float camOffsetX, float camOffsetY)

@@ -12,6 +12,9 @@ TagManager:
   - CavernDialectTriggerTNT
   - Spikes
   - Lever
+  - TriggerFollowCam
+  - PickUpTNT
+  - GeneralCamReset
   layers:
   - Default
   - TransparentFX
