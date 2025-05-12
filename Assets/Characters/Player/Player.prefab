@@ -5128,7 +5128,6 @@ MonoBehaviour:
   airAcceleration: 0.41
   airDecceleration: 0.7
   platformVel: 0
-  isOnMovingPlatform: 0
   gravityScale: 1.2
   gravityStrength: 1
   fallGravityMult: 2.7

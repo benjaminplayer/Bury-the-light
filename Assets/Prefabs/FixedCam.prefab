@@ -160,6 +160,7 @@ MonoBehaviour:
   RightTrigger: {fileID: 3565494380392640219}
   duration: 0.2
   BottomCollider: {fileID: 3103828562588077819}
+  TopCollider: {fileID: 0}
   entryPos: {x: 0, y: 0}
   _useStartPos: 0
   startPos: {x: 0, y: 0, z: 0}

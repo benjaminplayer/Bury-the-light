@@ -6,6 +6,8 @@ public class Usable : MonoBehaviour
 
     [SerializeField] private Transform _platform;
     [SerializeField] private GameObject _useButtonSprite;
+    [SerializeField] private float _platformMoveDuration;
+    [SerializeField] private float _PlatformHorizontalChange;
     private Animator leverAnimator;
     private void Awake()
     {
@@ -31,8 +33,8 @@ public class Usable : MonoBehaviour
     {
         FloatingPlatforms fp = _platform.GetComponent<FloatingPlatforms>();
         fp.SetMovementDir("Horizontal");
-        fp.SetDuration(4f);
-        fp.SetHorizontalChange(-16f);
+        fp.SetDuration(_platformMoveDuration); //4
+        fp.SetHorizontalChange(_PlatformHorizontalChange); //-16
         //Debug.Log(fp.GetArgs());
 
         if (leverAnimator != null)
