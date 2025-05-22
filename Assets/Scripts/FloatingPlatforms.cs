@@ -44,7 +44,7 @@ public class FloatingPlatforms : MonoBehaviour
     private Vector3 lastpos;
     public Vector3 velocity { get; private set; }
     public float speed => velocity.magnitude;
-
+    public float horizontalSpeedBoost = 1.1f;
 
     private void Awake()
     {

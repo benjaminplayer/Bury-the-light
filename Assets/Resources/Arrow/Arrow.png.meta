@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 019e20229ed28fb46ae20f4021ddb22e
+guid: e942e733caf38bf418dbd466e939dda1
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,13 +110,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: adventurer-bow-05
+      name: Arrow
       rect:
         serializedVersion: 2
-        x: 10
-        y: 0
-        width: 32
-        height: 32
+        x: 4
+        y: 4
+        width: 23
+        height: 23
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -135,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 68377ac18089a6c40b1763456daef4dc
+    spriteID: 3034438a48b54f54a9326bd799d5354f
     internalID: 0
     vertices: []
     indices: 
@@ -145,7 +145,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      adventurer-bow-05: -5373086310082204117
+      Arrow: -5373086310082204117
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

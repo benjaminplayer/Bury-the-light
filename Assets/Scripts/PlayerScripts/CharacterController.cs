@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 
 public class CharacterController : MonoBehaviour
 {
-    // TODO: Polej jump buffer, cap gravity, popravi jumps, tweak values, wall jump in hang,
+    // TODO: Polej jump buffer, cap gravity, popravi jumps, wall jump in hang, set sprites for wall jmp, nrdi slide
     //       smooth transition ko menjas stran movementa
     //       popravi animations -> probs gravity ma inpact na y velocity
 
@@ -28,7 +28,8 @@ public class CharacterController : MonoBehaviour
     private float airAcceleration;
     [SerializeField]
     private float airDecceleration;
-
+    [SerializeField] private Vector2 wallJumpForce;
+    [SerializeField] private float wallJumpTime;
 
     public float platformVel;
     #endregion
@@ -56,7 +57,12 @@ public class CharacterController : MonoBehaviour
     #region Player Actions
     public bool IsFacingRight { get; private set; }
     public bool IsJumping { get; private set; }
+    public bool IsWallJumping { get; private set; }
+    public bool IsFiring { get; private set; } // Lahko settas samo privately ampak je accessable publicly
     #endregion
+
+    private float _wallJumpStartTime;
+    private float _lastWallJumpDir;
 
     private bool _isJumpCut;
 
@@ -65,15 +71,24 @@ public class CharacterController : MonoBehaviour
     public bool canMove = true;
     private Collider2D usableInTrigger;
 
+    
+
     #region Timers init
     public float LastOnGroundTime { get; private set; }
     public float LastJumpTime { get; private set; }
+    public float LastOnRightWallTime { get; private set; }
+    public float LastOnLeftWallTime { get; private set; }
+    public float LastOnWallTime { get; private set; }
     #endregion
 
     #region Checks
     [Header("Ground Checks")]
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(.49f, .03f);
+    [SerializeField] private Transform _rightWallCheck;
+    [SerializeField] private Transform _leftWallCheck;
+    [SerializeField] private Vector2 _rightWallCheckSize;
+    [SerializeField] private Vector2 _leftWallCheckSize;
     [SerializeField] private float _groundCheckDist;
     #endregion
 
@@ -89,6 +104,8 @@ public class CharacterController : MonoBehaviour
     [SerializeField]
     private bool _useStartPos = true;
 
+    [SerializeField] private ParticleSystem particleSystem;
+
     private Rigidbody2D rb;
     Animator animator;
     private Collider2D platformHit;
@@ -100,6 +117,12 @@ public class CharacterController : MonoBehaviour
         startPos();
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        particleSystem.enableEmission = false;
+    }
+
+    private void Start()
+    {
+        IsFacingRight = true;
     }
 
 
@@ -120,6 +143,9 @@ public class CharacterController : MonoBehaviour
         #region Timers
         LastOnGroundTime -= Time.deltaTime; // preveri kdaj je bil player na zadnje na tleh
         LastJumpTime -= Time.deltaTime;     // preveri kdaj je bil player na zadnje v zraku
+        LastOnLeftWallTime -= Time.deltaTime;
+        LastOnRightWallTime -= Time.deltaTime;
+        LastOnWallTime -= Time.deltaTime;
         #endregion
 
         #region Input
@@ -134,10 +160,15 @@ public class CharacterController : MonoBehaviour
 
         }
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            BowAttack();  
+        }
+
         #endregion
 
         if (moveInput.x != 0)
-            CheckFacingDirection(moveInput.x < 0);
+            CheckFacingDirection(moveInput.x > 0);
 
         if (Input.GetKeyDown(KeyCode.Space) && canMove)
             OnJump();
@@ -160,6 +191,22 @@ public class CharacterController : MonoBehaviour
                 animator.SetBool("isGrounded", false);
             }
 
+            // Right wall intersection heck
+            if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && !IsFacingRight) && !IsWallJumping)
+            {
+                LastOnRightWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+                Debug.Log("Touching a wall");
+            }
+
+            // Left wall intersection heck
+            if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && !IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && IsFacingRight) && !IsWallJumping)
+            {
+                LastOnLeftWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+                Debug.Log("Touching a wall");
+            }
+
+            LastOnWallTime = Mathf.Max(LastOnRightWallTime, LastOnLeftWallTime);
+
             //Debug.Log(platformHit);
 
             if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
@@ -177,6 +224,11 @@ public class CharacterController : MonoBehaviour
             IsJumping = false;
         }
 
+        if (IsWallJumping && Time.time - _wallJumpStartTime > wallJumpTime)
+        { 
+            IsWallJumping = false;
+        }
+
         if (LastOnGroundTime > 0 && !IsJumping)
         {
             _isJumpCut = false;
@@ -186,7 +238,17 @@ public class CharacterController : MonoBehaviour
         {                                  // coyote time -> character lahko pritisne jump malo izven platforme
             IsJumping = true;
             _isJumpCut = false;
+            IsWallJumping = false;
             jump();
+        }
+        else if (CanWallJump() && LastJumpTime > 0)
+        {
+            IsWallJumping = true;
+            IsJumping = false;
+            _wallJumpStartTime = Time.deltaTime; // shrani si kdaj se je wall jump zacel
+            _lastWallJumpDir = (LastOnRightWallTime > 0) ? -1 : 1; //sharni v katero smer je igralec skocil
+            Debug.Log("Last wall jump dir: " + _lastWallJumpDir);
+            WallJump(_lastWallJumpDir);
         }
         #endregion
 
@@ -212,38 +274,6 @@ public class CharacterController : MonoBehaviour
             setGravityScale(gravityScale);
         }
         #endregion
-    }
-
-    public void setGravityScale(float newScale)
-    {
-        rb.gravityScale = newScale;
-    }
-
-    public void setGravityStrength(float newStrength)
-    {
-        gravityStrength = newStrength;
-    }
-
-    public void OnJump()
-    {
-        LastJumpTime = jumpBufferTime;
-    }
-
-    public void OnJumpUp()
-    {
-        if (CanJumpCut())
-            _isJumpCut = true;
-
-    }
-
-    private bool CanJump()
-    {
-        return LastOnGroundTime > 0 && !IsJumping;
-    }
-
-    private bool CanJumpCut()
-    {
-        return IsJumping && rb.linearVelocityY > 0;
     }
 
     // Update is called once per frame
@@ -278,15 +308,18 @@ public class CharacterController : MonoBehaviour
         {
             animator.SetBool("isMoving", false);
             animator.SetBool("isRunning", false);
+            particleSystem.enableEmission = false;
         }
         else if (Mathf.Abs(rb.linearVelocityX) < 5)
         {
+            particleSystem.enableEmission = true;
             animator.SetBool("isMoving", true);
             animator.SetBool("isRunning", false);
         }
         else
             animator.SetBool("isRunning", true);
         #endregion
+
 
         float movement = Mathf.Pow(Mathf.Abs(speedDif) * accelerationRate, velPower) * Mathf.Sign(speedDif);
         // Doda silo na characterja
@@ -296,8 +329,49 @@ public class CharacterController : MonoBehaviour
 
     }
 
+    public void setGravityScale(float newScale)
+    {
+        rb.gravityScale = newScale;
+    }
+
+    public void setGravityStrength(float newStrength)
+    {
+        gravityStrength = newStrength;
+    }
+
+    #region Jump check methods
+    public void OnJump()
+    {
+        LastJumpTime = jumpBufferTime;
+    }
+
+    public void OnJumpUp()
+    {
+        if (CanJumpCut())
+            _isJumpCut = true;
+
+    }
+
+    private bool CanJump()
+    {
+        return LastOnGroundTime > 0 && !IsJumping;
+    }
+
+    private bool CanJumpCut()
+    {
+        return IsJumping && rb.linearVelocityY > 0;
+    }
+
+    private bool CanWallJump()
+    { 
+        return LastJumpTime > 0 && LastOnWallTime > 0 && LastOnGroundTime <= 0 && (!IsWallJumping || (LastOnRightWallTime > 0 &&_lastWallJumpDir == 1) || (LastOnLeftWallTime > 0 && _lastWallJumpDir == -1));
+    }
+    #endregion
+
+    #region ActionLogic
     private void jump()
     {
+        particleSystem.enableEmission = false;
         LastOnGroundTime = 0; // Reset vrednisti
         LastJumpTime = 0;
 
@@ -313,7 +387,7 @@ public class CharacterController : MonoBehaviour
             platformVel = platformHit.GetComponent<FloatingPlatforms>().speed;
             //Debug.Log("Platform vel:" + platformVel);
             transform.SetParent(null);
-            force += platformVel;
+            //force += platformVel;
         }
 
         #region Aniamtor Toggles
@@ -323,6 +397,25 @@ public class CharacterController : MonoBehaviour
         Debug.Log("Character jump force: " + force);
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse); // Doda force na rb v vertikalo
         #endregion
+    }
+
+    private void WallJump(float dir)
+    {
+        LastJumpTime = 0;
+        LastOnGroundTime = 0;
+        LastOnRightWallTime = 0;
+        LastOnLeftWallTime = 0;
+
+        Vector2 force = new Vector2(wallJumpForce.x, wallJumpForce.y);
+        force.x *= dir; // ker je dir lahko samo 1 ali -1, ga za pomnožimo z silo na x osi -> obrne smer sile glede na usmerjenost igralca
+
+        if (Mathf.Sign(rb.linearVelocityX) != Mathf.Sign(force.x))
+            force.x -= rb.linearVelocityX;
+        
+        if(rb.linearVelocityY < 0) //preveri ali gralec pada in odsteje to hitrost sili, ki jo moramo dodati
+            force.y -= rb.linearVelocityY;
+
+        rb.AddForce(force, ForceMode2D.Impulse);
     }
 
     private void CheckFacingDirection(bool isMovingRight)
@@ -338,6 +431,71 @@ public class CharacterController : MonoBehaviour
         transform.localScale = scale;
         IsFacingRight = !IsFacingRight;
     }
+
+    private void BowAttack()
+    {
+        if (CanFire())
+        {
+            IsFiring = true;
+            animator.SetTrigger("fireBow");
+            StartCoroutine(WaitForEndOfAnim("player_bow_ground"));
+            canMove = false;
+
+        }
+    }
+
+    private bool CanFire()
+    {
+        if(IsJumping || IsWallJumping) return false;
+
+
+        if (IsFiring)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("player_bow_ground"))
+            {
+                return false;
+            }
+            else
+            {
+                IsFiring = false;
+            }
+        }
+
+        return true;
+    }
+
+    private void SpawnArrow()
+    {
+        Vector3 arrowSpawnLocation = _rightWallCheck.position;
+        GameObject arrowGO = new GameObject("Arrow");
+        Arrow arrow = arrowGO.AddComponent<Arrow>();
+        arrow.Initalize(arrowSpawnLocation, IsFacingRight);
+    }
+
+    private IEnumerator WaitForEndOfAnim(string name)
+    {
+        yield return null;
+
+        while(rb.linearVelocityX != 0) yield return null;
+
+        while (AnimatorIsPlaying() && animator.GetCurrentAnimatorStateInfo(0).IsName(name))
+        {
+            yield return null;        
+        }
+
+        canMove = true;
+        SpawnArrow();
+    }
+
+    bool AnimatorIsPlaying()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).length >
+               animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+    }
+
+    #endregion
+
+    #region Hit Logic
 
     public void OnHit()
     {
@@ -378,7 +536,9 @@ public class CharacterController : MonoBehaviour
             yield return null;
         resetMovementAfterHit();
     }
+    #endregion
 
+    #region Collision Logic
     private void OnCollisionEnter2D(Collision2D collision)
     {
         Debug.Log(collision.collider);
@@ -393,8 +553,6 @@ public class CharacterController : MonoBehaviour
         {
             OnHit();
         }
-
-
 
     }
 
@@ -461,6 +619,18 @@ public class CharacterController : MonoBehaviour
         if(collision == usableInTrigger)
             usableInTrigger = null;
     }
+    #endregion
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        // Adjust with your own values
+        Vector2 boxCenter = (Vector2)_leftWallCheck.transform.position + new Vector2(0f, 0f); // offset if needed
+        Vector2 boxSize = _leftWallCheckSize; // size of your overlap box
+
+
+        Gizmos.DrawWireCube(Vector3.zero, boxSize);
+    }
 
 }

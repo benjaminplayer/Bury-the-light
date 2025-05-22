@@ -295,6 +295,40 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &335369735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 335369736}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &335369736
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335369735}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 180.02, y: -11.1, z: 0.07636988}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 858218171}
+  - {fileID: 1161585942}
+  - {fileID: 1040899456}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &337139977
 GameObject:
   m_ObjectHideFlags: 0
@@ -34430,6 +34464,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!483693784 &537457771
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -35031,6 +35066,7 @@ MonoBehaviour:
   moveOnTouch: 0
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!483693784 &817919236
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -35275,6 +35311,7 @@ MonoBehaviour:
   moveOnTouch: 0
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!61 &817919240
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -35438,11 +35475,11 @@ Transform:
   m_GameObject: {fileID: 858218170}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 180.02, y: -12.46, z: 0.07636988}
+  m_LocalPosition: {x: 0, y: -1.3599997, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 335369736}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &938475520
 GameObject:
@@ -35906,13 +35943,14 @@ MonoBehaviour:
   horizontalChange: 1
   verticalSpeed: 0
   horizontalSpeed: 0
-  duration: 12
+  duration: 14
   horizontalMovement: 0
   verticalMovement: 1
   isContinous: 0
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!1001 &992818385
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35967,7 +36005,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5788877818717069236, guid: 0ff0db07e79eaef4ba8fbe61643cfc7c, type: 3}
       propertyPath: _useStartPos
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6956985008052732875, guid: 0ff0db07e79eaef4ba8fbe61643cfc7c, type: 3}
       propertyPath: m_Size.y
@@ -36384,11 +36422,11 @@ Transform:
   m_GameObject: {fileID: 1040899455}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 180.02, y: -11.1, z: 0.07636988}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 335369736}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &1040899457
 MonoBehaviour:
@@ -37665,6 +37703,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!483693784 &1080019176
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -41637,11 +41676,11 @@ Transform:
   m_GameObject: {fileID: 1161585941}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 180.1, y: -7.79, z: 0.07636988}
+  m_LocalPosition: {x: 0.08000183, y: 3.3100004, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 335369736}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1191767607
 GameObject:
@@ -49251,11 +49290,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7372786689654314778, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 167.4
+      value: -11.9
       objectReference: {fileID: 0}
     - target: {fileID: 7372786689654314778, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.06
+      value: -1.96
       objectReference: {fileID: 0}
     - target: {fileID: 7372786689654314778, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -49628,6 +49667,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!483693784 &1617520925
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -50303,6 +50343,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!66 &1745719402
 CompositeCollider2D:
   m_ObjectHideFlags: 0
@@ -50645,6 +50686,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!19719996 &1789496218
 TilemapCollider2D:
   m_ObjectHideFlags: 0
@@ -51258,6 +51300,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!1 &1810167118
 GameObject:
   m_ObjectHideFlags: 0
@@ -51561,6 +51604,7 @@ MonoBehaviour:
   moveOnTouch: 0
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!61 &1810167125
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -105881,6 +105925,7 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  horizontalSpeedBoost: 1.1
 --- !u!483693784 &2091858268
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -106704,7 +106749,5 @@ SceneRoots:
   - {fileID: 1043967946}
   - {fileID: 482175210}
   - {fileID: 406342082}
-  - {fileID: 858218171}
-  - {fileID: 1161585942}
-  - {fileID: 1040899456}
+  - {fileID: 335369736}
   - {fileID: 1674553548}

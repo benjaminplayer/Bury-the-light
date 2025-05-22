@@ -116,7 +116,7 @@ public class CameraController : MonoBehaviour
                 collision.gameObject.transform.position = entryPos;
             }
 
-            if (collision.IsTouching(TopCollider))
+            if (TopCollider != null && collision.IsTouching(TopCollider))
             {
                 MoveCameraUp();
             }

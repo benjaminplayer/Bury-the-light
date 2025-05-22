@@ -110,15 +110,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 32px-Logo_of_Twitter.svg_0
+      name: adventurer-bow-06
       rect:
         serializedVersion: 2
-        x: 0
+        x: 10
         y: 0
         width: 32
-        height: 27
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -135,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 603daf7b08afc114c9cdf183ef501134
     internalID: 0
     vertices: []
     indices: 
@@ -145,7 +145,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      32px-Logo_of_Twitter.svg_0: -5373086310082204117
+      adventurer-bow-06: -5373086310082204117
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
