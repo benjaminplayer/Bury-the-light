@@ -30,7 +30,8 @@ public class CharacterController : MonoBehaviour
     private float airDecceleration;
     [SerializeField] private Vector2 wallJumpForce;
     [SerializeField] private float wallJumpTime;
-
+    [SerializeField] private float slideSpeed;
+    [SerializeField] private float slideAccTime;
     public float platformVel;
     #endregion
 
@@ -59,6 +60,7 @@ public class CharacterController : MonoBehaviour
     public bool IsJumping { get; private set; }
     public bool IsWallJumping { get; private set; }
     public bool IsFiring { get; private set; } // Lahko settas samo privately ampak je accessable publicly
+    public bool IsSliding { get; private set; }
     #endregion
 
     private float _wallJumpStartTime;
@@ -125,15 +127,12 @@ public class CharacterController : MonoBehaviour
         IsFacingRight = true;
     }
 
-
     private void Update()
     {
         if (!_isAlive)
         {
             GetComponent<CharacterController>().enabled = false;
         }
-
-        
 
         if (health <= 0)
         {
@@ -174,7 +173,6 @@ public class CharacterController : MonoBehaviour
             OnJump();
 
         animator.SetFloat("yVelocity", rb.linearVelocityY);
-        //Debug.Log(rb.linearVelocityY);
         if (!IsJumping)
         {
             platformHit = Physics2D.OverlapBox(_groundCheckPoint.position, _groundCheckSize, 0, _groundLayer);
@@ -191,24 +189,6 @@ public class CharacterController : MonoBehaviour
                 animator.SetBool("isGrounded", false);
             }
 
-            // Right wall intersection heck
-            if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && !IsFacingRight) && !IsWallJumping)
-            {
-                LastOnRightWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
-                Debug.Log("Touching a wall");
-            }
-
-            // Left wall intersection heck
-            if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && !IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && IsFacingRight) && !IsWallJumping)
-            {
-                LastOnLeftWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
-                Debug.Log("Touching a wall");
-            }
-
-            LastOnWallTime = Mathf.Max(LastOnRightWallTime, LastOnLeftWallTime);
-
-            //Debug.Log(platformHit);
-
             if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
             {
                 //player.transform.SetParent(platform);
@@ -218,6 +198,22 @@ public class CharacterController : MonoBehaviour
 
 
         }
+
+        // Right wall intersection heck
+        if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && !IsFacingRight) && !IsWallJumping)
+        {
+            LastOnRightWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+        }
+
+        // Left wall intersection heck
+        if ((Physics2D.OverlapBox(_rightWallCheck.position, _rightWallCheckSize, 0, _groundLayer) && !IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _leftWallCheckSize, 0, _groundLayer) && IsFacingRight) && !IsWallJumping)
+        {
+            LastOnLeftWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+        }
+
+        LastOnWallTime = Mathf.Max(LastOnRightWallTime, LastOnLeftWallTime);
+
+
         #region Jump Checks
         if (IsJumping && rb.linearVelocityY < 0) // ce je ze skocil in je hitrost na y osi = 0 dovoli next skok
         {
@@ -245,16 +241,28 @@ public class CharacterController : MonoBehaviour
         {
             IsWallJumping = true;
             IsJumping = false;
-            _wallJumpStartTime = Time.deltaTime; // shrani si kdaj se je wall jump zacel
+            _wallJumpStartTime = Time.time; // shrani si kdaj se je wall jump zacel
             _lastWallJumpDir = (LastOnRightWallTime > 0) ? -1 : 1; //sharni v katero smer je igralec skocil
-            Debug.Log("Last wall jump dir: " + _lastWallJumpDir);
             WallJump(_lastWallJumpDir);
         }
         #endregion
 
+        Debug.Log("JumpChck values: IsJumping=" + IsJumping + "; IsWallJumping: " + IsWallJumping);
+
+        if (CanSlide() && (LastOnLeftWallTime > 0 && moveInput.x < 0) || (LastOnRightWallTime > 0 && moveInput.x > 0)) // Ce lahko igralec slidea in se premika v zid, dovoli slide
+        {
+            IsSliding = true;
+        }
+        else
+            IsSliding = false;
+
 
         #region GravityManipulation
-        if (rb.linearVelocityY < 0)
+        if (IsSliding)
+        {
+            //setGravityScale(0);
+        }
+        else if (rb.linearVelocityY < 0)
         {
             // povecuje gravitacijo med padanjem
             setGravityScale(gravityScale * fallGravityMult);
@@ -265,7 +273,6 @@ public class CharacterController : MonoBehaviour
         }
         else if ((IsJumping) && Mathf.Abs(rb.linearVelocityY) < 0.1)
         {
-            //Debug.Log(rb.linearVelocityY);
             setGravityScale(gravityScale * reduceGravityMult);
         }
         else
@@ -297,8 +304,6 @@ public class CharacterController : MonoBehaviour
 
         #region Set animations for the character based on its speed
 
-        //Debug.Log(rb.linearVelocityX);
-
         if ((Mathf.Abs(rb.linearVelocityX) > 0) && Mathf.Abs(rb.linearVelocityX) < .0000005f) //prepreci nepravilno nastavljanje linVelX
         {
             rb.linearVelocityX = 0;
@@ -320,12 +325,20 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("isRunning", true);
         #endregion
 
-
-        float movement = Mathf.Pow(Mathf.Abs(speedDif) * accelerationRate, velPower) * Mathf.Sign(speedDif);
+        float movement;
+        movement = Mathf.Pow(Mathf.Abs(speedDif) * accelerationRate, velPower) * Mathf.Sign(speedDif);
         // Doda silo na characterja
+
         rb.AddForce(movement * Vector2.right); //Vector2.right -> affecta samo x os
 
         #endregion
+
+
+        if (IsSliding)
+        { 
+            Slide();
+        }
+        animator.SetBool("IsSliding", IsSliding);
 
     }
 
@@ -380,12 +393,10 @@ public class CharacterController : MonoBehaviour
 
         if (rb.linearVelocityY < 0)
             force -= rb.linearVelocityY;
-        //Debug.Log(force);
 
         if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
         {
             platformVel = platformHit.GetComponent<FloatingPlatforms>().speed;
-            //Debug.Log("Platform vel:" + platformVel);
             transform.SetParent(null);
             //force += platformVel;
         }
@@ -394,7 +405,7 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isGrounded", false);
         animator.SetTrigger("jump");
         #endregion
-        Debug.Log("Character jump force: " + force);
+
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse); // Doda force na rb v vertikalo
         #endregion
     }
@@ -416,6 +427,21 @@ public class CharacterController : MonoBehaviour
             force.y -= rb.linearVelocityY;
 
         rb.AddForce(force, ForceMode2D.Impulse);
+    }
+
+    private void Slide()
+    {
+        float diff = slideSpeed - rb.linearVelocityY;
+        float movement = diff * slideAccTime;
+
+        movement = Mathf.Clamp(movement, -Mathf.Abs(diff) * (1/Time.fixedDeltaTime), Mathf.Abs(diff) * (1 / Time.fixedDeltaTime));
+
+        rb.AddForce(movement * Vector2.up);
+    }
+
+    private bool CanSlide()
+    {
+        return LastOnWallTime > 0 && !IsJumping && !IsWallJumping && LastOnGroundTime <= 0;
     }
 
     private void CheckFacingDirection(bool isMovingRight)
@@ -469,7 +495,7 @@ public class CharacterController : MonoBehaviour
         Vector3 arrowSpawnLocation = _rightWallCheck.position;
         GameObject arrowGO = new GameObject("Arrow");
         Arrow arrow = arrowGO.AddComponent<Arrow>();
-        arrow.Initalize(arrowSpawnLocation, IsFacingRight);
+        arrow.Initialize(arrowSpawnLocation, IsFacingRight);
     }
 
     private IEnumerator WaitForEndOfAnim(string name)
@@ -561,7 +587,6 @@ public class CharacterController : MonoBehaviour
     {
         if (collision.collider.CompareTag("blockMovement") && IsJumping)
         {
-            Debug.Log("collision with rock wall");
             rb.linearVelocity = new Vector2(0f, rb.linearVelocityY);
         }
 
@@ -624,13 +649,8 @@ public class CharacterController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-
-        // Adjust with your own values
-        Vector2 boxCenter = (Vector2)_leftWallCheck.transform.position + new Vector2(0f, 0f); // offset if needed
-        Vector2 boxSize = _leftWallCheckSize; // size of your overlap box
-
-
-        Gizmos.DrawWireCube(Vector3.zero, boxSize);
+        Gizmos.DrawWireCube(_groundCheckPoint.transform.position, _groundCheckSize);
+        Gizmos.DrawWireCube(_rightWallCheck.transform.position, _rightWallCheckSize);
     }
 
 }

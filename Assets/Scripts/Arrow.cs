@@ -8,7 +8,7 @@ public class Arrow : MonoBehaviour
     [SerializeField] private Sprite _sprite;
     [SerializeField] private float speed = 30f;
     private GameObject spriteGO;
-    public void Initalize(Vector3 spawnLoc, bool moveDir)
+    public void Initialize(Vector3 spawnLoc, bool moveDir)
     {
         spriteGO = new GameObject("arrowSprite");
         _sprite = Resources.Load<Sprite>("Arrow/Arrow");

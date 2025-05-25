@@ -200,6 +200,9 @@ MonoBehaviour:
   pointA: {fileID: 2272203729127615010}
   pointB: {fileID: 51499157585487160}
   speed: 2
+  HorizontalMovement: 0
+  VerticalMovement: 0
+  _WaitBeforeMoving: 0
 --- !u!1 &2272203729127615010
 GameObject:
   m_ObjectHideFlags: 0
