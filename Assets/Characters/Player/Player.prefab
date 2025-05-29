@@ -5129,8 +5129,8 @@ MonoBehaviour:
   airDecceleration: 0.7
   wallJumpForce: {x: 7.8, y: 5.6}
   wallJumpTime: 0.9
-  slideSpeed: 0
-  slideAccTime: 0
+  slideSpeed: 2
+  slideAccTime: 3
   platformVel: 0
   gravityScale: 1.2
   gravityStrength: 1

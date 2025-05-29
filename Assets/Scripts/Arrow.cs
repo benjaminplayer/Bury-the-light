@@ -40,7 +40,7 @@ public class Arrow : MonoBehaviour
     {
         Vector3 direction = moveRight ? Vector3.right : Vector3.left; // nastavi smer glede na to ali se premika levo ali desno
 
-        if (moveRight) spriteGO.transform.localScale *= -1;
+        if (!moveRight) spriteGO.transform.localScale *= -1;
 
         while (true)
         {

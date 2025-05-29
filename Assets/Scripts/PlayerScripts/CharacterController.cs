@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.Rendering.Universal;
@@ -11,6 +12,8 @@ public class CharacterController : MonoBehaviour
     //       popravi animations -> probs gravity ma inpact na y velocity
 
     public int health = 100;
+
+    [SerializeField] private TextMeshPro debugTMP;
 
     #region Action Values
     [Header("Action Values")]
@@ -32,6 +35,8 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float wallJumpTime;
     [SerializeField] private float slideSpeed;
     [SerializeField] private float slideAccTime;
+    [Range(0, 1f)][SerializeField] private float WallJumpLerpAmount = 1f;
+    [SerializeField] private float WallJumpHangTime = 0;
     public float platformVel;
     #endregion
 
@@ -61,6 +66,7 @@ public class CharacterController : MonoBehaviour
     public bool IsWallJumping { get; private set; }
     public bool IsFiring { get; private set; } // Lahko settas samo privately ampak je accessable publicly
     public bool IsSliding { get; private set; }
+    public bool IsHanging { get; private set; }
     #endregion
 
     private float _wallJumpStartTime;
@@ -81,6 +87,7 @@ public class CharacterController : MonoBehaviour
     public float LastOnRightWallTime { get; private set; }
     public float LastOnLeftWallTime { get; private set; }
     public float LastOnWallTime { get; private set; }
+    public float HangTime { get; private set; }
     #endregion
 
     #region Checks
@@ -120,6 +127,7 @@ public class CharacterController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         particleSystem.enableEmission = false;
+        HangTime = WallJumpHangTime;
     }
 
     private void Start()
@@ -213,6 +221,18 @@ public class CharacterController : MonoBehaviour
 
         LastOnWallTime = Mathf.Max(LastOnRightWallTime, LastOnLeftWallTime);
 
+        //debugTMP.SetText("CanHang?" + CanHang() + "\nLastOnWallTimeABS" + Mathf.Abs(LastOnWallTime) + "\nlast on right wall time " + LastOnRightWallTime + "\n hangTime=" + HangTime + "\n IsHanging?= " + IsHanging);
+
+        /*if (CanHang() && Mathf.Abs(LastOnWallTime) < HangTime)
+        {
+            Debug.Log("HangTimeIF");
+            HangTime -= Time.deltaTime;
+            IsHanging = true;
+        }
+        else //if (IsHanging && Mathf.Abs(LastOnWallTime) > HangTime)
+        {
+            IsHanging = false;
+        }*/
 
         #region Jump Checks
         if (IsJumping && rb.linearVelocityY < 0) // ce je ze skocil in je hitrost na y osi = 0 dovoli next skok
@@ -243,11 +263,11 @@ public class CharacterController : MonoBehaviour
             IsJumping = false;
             _wallJumpStartTime = Time.time; // shrani si kdaj se je wall jump zacel
             _lastWallJumpDir = (LastOnRightWallTime > 0) ? -1 : 1; //sharni v katero smer je igralec skocil
+            HangTime = WallJumpHangTime;
+            //IsHanging = false;
             WallJump(_lastWallJumpDir);
         }
         #endregion
-
-        Debug.Log("JumpChck values: IsJumping=" + IsJumping + "; IsWallJumping: " + IsWallJumping);
 
         if (CanSlide() && (LastOnLeftWallTime > 0 && moveInput.x < 0) || (LastOnRightWallTime > 0 && moveInput.x > 0)) // Ce lahko igralec slidea in se premika v zid, dovoli slide
         {
@@ -286,12 +306,37 @@ public class CharacterController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        #region Movement
+
+        if (IsHanging)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        if (IsWallJumping)
+        {
+            Run(WallJumpLerpAmount);
+        }
+        else
+        {
+            Run(1);
+        }
+
+
+        if (IsSliding)
+        { 
+            Slide();
+        }
+        animator.SetBool("IsSliding", IsSliding);
+
+    }
+
+    private void Run(float lerpAmount)
+    {
         // Dobi desired speed
-        float targetSpeed = moveInput.x * moveSpeed;
-        // Izracuna difference med desired speed in current speed
-        float speedDif = targetSpeed - rb.linearVelocityX;
-        // Dobi kako hitro more character ali pospesiti ali upocasniti
+        float targetSpeed = moveInput.x * moveSpeed; // Izracuna difference med desired speed in current speed
+        targetSpeed = Mathf.Lerp(rb.linearVelocityX, targetSpeed, lerpAmount); // doda linearno interpolacijo med trenutno in zeleno hitrostijo
+
+        //debugTMP.SetText("Current speed: " + rb.linearVelocityX + "\nTarget speed: " + targetSpeed +"\n lerp amount: "+lerpAmount +" | is WallJumping? "+IsWallJumping);
 
         #region Calc Acceleration Rate
         float accelerationRate;
@@ -322,23 +367,18 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("isRunning", false);
         }
         else
+        {
+            animator.SetBool("isMoving", true);
             animator.SetBool("isRunning", true);
+        }
         #endregion
 
-        float movement;
-        movement = Mathf.Pow(Mathf.Abs(speedDif) * accelerationRate, velPower) * Mathf.Sign(speedDif);
+        float speedDif = targetSpeed - rb.linearVelocityX; // Dobi kako hitro more character ali pospesiti ali upocasniti
+
+        float movement = speedDif * accelerationRate;
         // Doda silo na characterja
 
         rb.AddForce(movement * Vector2.right); //Vector2.right -> affecta samo x os
-
-        #endregion
-
-
-        if (IsSliding)
-        { 
-            Slide();
-        }
-        animator.SetBool("IsSliding", IsSliding);
 
     }
 
@@ -379,6 +419,12 @@ public class CharacterController : MonoBehaviour
     { 
         return LastJumpTime > 0 && LastOnWallTime > 0 && LastOnGroundTime <= 0 && (!IsWallJumping || (LastOnRightWallTime > 0 &&_lastWallJumpDir == 1) || (LastOnLeftWallTime > 0 && _lastWallJumpDir == -1));
     }
+
+    /*private bool CanHang()
+    {
+        return !IsWallJumping && (LastOnRightWallTime > 0 && moveInput.x == 1) || (LastOnLeftWallTime > 0 && moveInput.x == -1);
+    }*/
+
     #endregion
 
     #region ActionLogic
