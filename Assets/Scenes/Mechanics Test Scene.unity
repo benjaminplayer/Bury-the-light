@@ -2081,54 +2081,6 @@ PrefabInstance:
       propertyPath: debugTMP
       value: 
       objectReference: {fileID: 807291200}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: slideAccTime
-      value: 0.36
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: heldDownBoost
-      value: 3.07
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: wallJumpForce.x
-      value: 4.64
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: wallJumpForce.y
-      value: 6.99
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: WallJumpHangTime
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: _WallCheckSize.x
-      value: 0.15
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: _WallCheckSize.y
-      value: 0.97
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: reduceGravityMult
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: WallJumpLerpAmount
-      value: 0.852
-      objectReference: {fileID: 0}
-    - target: {fileID: 495731442508367717, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: jumpHangTimeTreshold
-      value: 0.045
-      objectReference: {fileID: 0}
-    - target: {fileID: 5064230245582666257, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.318
-      objectReference: {fileID: 0}
     - target: {fileID: 6069489869257606368, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
       propertyPath: m_Name
       value: Player
@@ -2172,14 +2124,6 @@ PrefabInstance:
     - target: {fileID: 7372786689654314778, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8422730625717817112, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9202340426983982281, guid: 0cfb8e613ba84754eaf96f23ec204c2a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.305
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

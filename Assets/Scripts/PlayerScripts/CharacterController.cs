@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    // TODO: Polej jump buffer, wall jump in hang, popravi wall jump forces -> l slower than r
+    // TODO: Polej jump buffer,
     //       popravi animations -> probs gravity ma inpact na y velocity
 
     public int health = 100;
@@ -22,18 +22,25 @@ public class CharacterController : MonoBehaviour
     private float decceleration = 1f;
     [SerializeField]
     private float velPower = .9f;
+
+    [Header("Jump")]
     [SerializeField]
     private float jumpForce = 5f;
     [SerializeField]
     private float airAcceleration;
     [SerializeField]
     private float airDecceleration;
+
+    [Header("WallJump")]
     [SerializeField] private Vector2 wallJumpForce;
     [SerializeField] private float wallJumpTime;
-    [SerializeField] private float slideSpeed;
-    [SerializeField] private float slideAccTime;
     [Range(0, 1f)][SerializeField] private float WallJumpLerpAmount = 1f;
     [Range(0,1f)][SerializeField] private float jumpHangTimeTreshold;
+
+    [Header("Slide")]
+    [SerializeField] private float slideSpeed;
+    [SerializeField] private float slideAccTime;
+    [Range(0,5f)][SerializeField] private float stamina;
     public float platformVel;
     #endregion
 
@@ -114,8 +121,6 @@ public class CharacterController : MonoBehaviour
 
     private bool _Resetable;
 
-    private PhysicsMaterial2D physicsMaterial2D;
-
 
     private void Awake()
     {
@@ -123,10 +128,6 @@ public class CharacterController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         particleSystem.enableEmission = false;
-
-        physicsMaterial2D = new PhysicsMaterial2D("Anti wall stick");
-        physicsMaterial2D.friction = 0;
-        physicsMaterial2D.bounciness = 0;
 
     }
 
@@ -175,7 +176,7 @@ public class CharacterController : MonoBehaviour
         }
 
         #endregion
-
+        //Reseti is jumping -> causing wall problems
         if (moveInput.x != 0)
             CheckFacingDirection(moveInput.x > 0);
 
@@ -190,6 +191,7 @@ public class CharacterController : MonoBehaviour
             if (Physics2D.OverlapBox(_groundCheckPoint.position, _groundCheckSize, 0, _groundLayer))
             {
                 LastOnGroundTime = jumpCoyoteTime;
+                HangTime = 0;
                 animator.SetBool("isGrounded", true);
                 animator.ResetTrigger("jump");
                 rb.linearVelocityY = 0;
@@ -210,13 +212,17 @@ public class CharacterController : MonoBehaviour
         // Right wall intersection heck
         if ((Physics2D.OverlapBox(_rightWallCheck.position, _WallCheckSize, 0, _groundLayer) && IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _WallCheckSize, 0, _groundLayer) && !IsFacingRight) && !IsWallJumping)
         {
-            LastOnRightWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp  
+            LastOnRightWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+            if (LastOnGroundTime < 0 && moveInput.x == 1)
+                IsJumping = false;
         }
 
         // Left wall intersection heck
         if ((Physics2D.OverlapBox(_rightWallCheck.position, _WallCheckSize, 0, _groundLayer) && !IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _WallCheckSize, 0, _groundLayer) && IsFacingRight) && !IsWallJumping)
         {
             LastOnLeftWallTime = jumpCoyoteTime; // nastavi coyote time za wall jmp
+            if (LastOnGroundTime < 0 && moveInput.x == -1)
+                IsJumping = false;
         }
 
         LastOnWallTime = Mathf.Max(LastOnRightWallTime, LastOnLeftWallTime);
@@ -255,9 +261,19 @@ public class CharacterController : MonoBehaviour
         }
         #endregion
 
-        if (CanSlide() && (LastOnLeftWallTime > 0 && moveInput.x < 0) || (LastOnRightWallTime > 0 && moveInput.x > 0)) // Ce lahko igralec slidea in se premika v zid, dovoli slide
+        if (LastOnGroundTime < 0 && ((LastOnLeftWallTime > 0 && moveInput.x < 0) || (LastOnRightWallTime > 0 && moveInput.x > 0)))
+        {
+            animator.SetBool("IsSliding", true);
+        } 
+        else
+        {
+            animator.SetBool("IsSliding", false);
+        }
+
+        if (CanSlide() && ((LastOnLeftWallTime > 0 && moveInput.x < 0) || (LastOnRightWallTime > 0 && moveInput.x > 0))) // Ce lahko igralec slidea in se premika v zid, dovoli slide
         {
             IsSliding = true;
+            HangTime += Time.deltaTime;
         }
         else
             IsSliding = false;
@@ -266,7 +282,7 @@ public class CharacterController : MonoBehaviour
         #region GravityManipulation
         if (IsSliding)
         {
-            if (moveInput.y < 0)
+            if (moveInput.y < 0 || HangTime > stamina) // ce je igralec pre vec casa na zidu, nanj zacne delovati gravitacija
             {
                 setGravityScale(gravityScale);
             }
@@ -297,14 +313,6 @@ public class CharacterController : MonoBehaviour
             setGravityScale(gravityScale);
         }
         #endregion
-
-        new DebugItem<Vector2>("Movement vector", moveInput);
-        new DebugItem<Vector2>("Player Velocity ", rb.linearVelocity);
-        new DebugItem<float>("Last on right wall time", LastOnRightWallTime);
-        new DebugItem<float>("Last on left wall time", LastOnLeftWallTime);
-        new DebugItem<float>("Rb gravity scale", rb.gravityScale);
-        new DebugItem<bool>("IsSliding", IsSliding);
-
     }
 
     // Update is called once per frame
@@ -325,8 +333,22 @@ public class CharacterController : MonoBehaviour
         { 
             Slide();
         }
-        animator.SetBool("IsSliding", IsSliding);
+    }
 
+    private void LateUpdate()
+    {
+        new DebugItem<Vector2>("Movement vector", moveInput);
+        new DebugItem<Vector2>("Player Velocity ", rb.linearVelocity);
+        new DebugItem<float>("Last on right wall time", LastOnRightWallTime);
+        new DebugItem<float>("Last on left wall time", LastOnLeftWallTime);
+        new DebugItem<float>("Last on ground time", LastOnGroundTime);
+        new DebugItem<float>("Rb gravity scale", rb.gravityScale);
+        new DebugItem<bool>("IsWallJumping",IsWallJumping);
+        new DebugItem<bool>("IsJumping",IsJumping);
+        new DebugItem<bool>("Can slide", CanSlide());
+        new DebugItem<bool>("IsSliding", IsSliding);
+        new DebugItem<float>("Walljmp time", (Time.time - _wallJumpStartTime));
+        new DebugItem<float>("HangTime",HangTime);
     }
 
     private void Run(float lerpAmount)
