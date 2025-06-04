@@ -5134,6 +5134,7 @@ MonoBehaviour:
   jumpHangTimeTreshold: 0.045
   slideSpeed: 2
   slideAccTime: 0.36
+  stamina: 0
   platformVel: 0
   gravityScale: 1.2
   fallGravityMult: 2.7
