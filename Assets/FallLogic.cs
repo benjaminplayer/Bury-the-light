@@ -34,7 +34,6 @@ public class FallLogic : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         StartCoroutine(zoomCamera(.2f, 7, false));
         StartCoroutine(DropPlatform());
-        StartCoroutine(FixOffset());
     }
 
     private IEnumerator DropPlatform()
@@ -78,13 +77,6 @@ public class FallLogic : MonoBehaviour
         Camera.main.orthographicSize = targetSize;
         if(zoomOnPlayer)
             Camera.main.transform.GetComponent<CameraController>().SetFollowCam(true);
-    }
-
-    private IEnumerator FixOffset() 
-    { 
-        yield return new WaitForSeconds(1);
-        Camera.main.transform.GetComponent<CameraController>().SetOffsetY(-2);
-        Camera.main.transform.GetComponent<CameraController>().FixOffset(1);
     }
 
 }

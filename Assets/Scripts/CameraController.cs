@@ -1,64 +1,71 @@
-using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
     //TODO: Naredi lepsi prehod med Scenes, fix the lvls
 
-    [SerializeField]
-    private Transform camera;
-    //[SerializeField]
-    private float moveOffset;
+    #region Camera Values
+    private Camera cam;
+    private readonly float tilesCount = 36; //koliko tiles je vidnih na sirino mape
+    private float newSize = 0, ascpet = 0, moveOffset, cameraWidth, cameraHeight;
+    #endregion
 
-    //Colliders
-    [SerializeField]
-    private GameObject LeftTrigger;
-    [SerializeField]
-    private GameObject RightTrigger;
-    [SerializeField]
-    [Range(0f, 1f)]
-    private float duration;
+    [SerializeField][Range(0f, 1f)][Header("Camera Lerp Duration")] private float duration;
 
-
-    private BoxCollider2D LeftCollider;
-    private BoxCollider2D RightCollider;
-    [SerializeField] private BoxCollider2D BottomCollider;
-    [SerializeField] private BoxCollider2D TopCollider;
+    #region Collider references
+    [Header("Collider references")]
+    [SerializeField] private BoxCollider2D LeftCollider;
+    [SerializeField] private BoxCollider2D RightCollider;
+    [SerializeField] private Collider2D BottomCollider;
+    [SerializeField] private Collider2D TopCollider;
+    #endregion
+    
+    [Header("Other values")]
     public Vector2 entryPos;
     [SerializeField] private bool _useStartPos = true;
     [SerializeField] private Vector3 startPos;
     [SerializeField] private GameObject player;
 
     #region FollowCamAttributes
-
     public bool FollowPlayer;
     private bool FollowPlayerX;
     public float camOffsetX = 0;
     public float camOffsetY = 0;
     public Vector3 camOffset;
-    
     #endregion
-    private float cameraWidth;
+
+    #region Camera Move Check values
+    private bool isMoving = false;
+    private Collider2D _lastColliderTouched = null;
+    private GameObject moveCheckColldier = null;
+    private Collider2D playerCollider = null;
+    #endregion
+
+    Vector2 boxSize = Vector2.zero;
+    Vector2 boxCenter = Vector2.zero;
 
     public static bool IsEndOfLevel = false;
-    private float cameraHeight;
 
     private void Awake()
     {
+        cam = this.GetComponent<Camera>();
+
         camOffset = new Vector3(camOffsetX, camOffsetY);
         useStartPos(_useStartPos);
-        LeftCollider = LeftTrigger.GetComponent<BoxCollider2D>();
-        RightCollider = RightTrigger.GetComponent<BoxCollider2D>();
 
-        Camera cam = camera.GetComponentInParent<Camera>();
+        //nastavi scale kamere glede na resolution mobilne naprave
+        ascpet = (float)Screen.width / Screen.height;
+        newSize = (tilesCount / ascpet) / 2f;
+
+        //nastavi move offset za premik
         cameraHeight = cam.orthographicSize * 2f;
-
+        cam.orthographicSize = newSize;
         cameraWidth = cameraHeight * Screen.width / Screen.height;
-
         moveOffset = cameraWidth;
-
-        //Debug.Log(cameraWidth);
 
     }
 
@@ -79,12 +86,16 @@ public class CameraController : MonoBehaviour
 
     }
 
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
         if (collision.gameObject.CompareTag("Player"))
         {
+            if (playerCollider == null) playerCollider = collision;
+            Debug.Log("Collided with player!");
+
+            if (!CheckCameraMove(collision)) return;
+
             if (collision.IsTouching(LeftCollider))
             {
                 if (IsEndOfLevel)
@@ -122,18 +133,41 @@ public class CameraController : MonoBehaviour
             }
 
         }
+
+        Debug.Log("Updated last touching collider: " + _lastColliderTouched);
+
+    }
+
+    private bool CheckCameraMove(Collider2D collision)
+    {
+        if (collision.IsTouching(RightCollider))
+        {
+            boxCenter = RightCollider.bounds.center + new Vector3(.25f, 0);
+            boxSize = RightCollider.bounds.size;
+        }
+        else
+        { 
+            boxCenter = LeftCollider.bounds.center - new Vector3(.25f, 0);
+            boxSize = LeftCollider.bounds.size;
+        }
+        
+        Collider2D hit = Physics2D.OverlapBox(boxCenter, boxSize,0f, LayerMask.GetMask("Player"));
+
+        return hit == null; // returna ali je player v boxu in nulla vrednost
     }
 
     private void moveCameraRight()
     {
-        Vector3 endPos = new Vector3(camera.position.x + moveOffset, camera.position.y, camera.position.z);
-        StartCoroutine(moveCamera(camera.position, endPos, duration));
+        Vector3 endPos = new Vector3(this.transform.position.x + moveOffset, this.transform.position.y, this.transform.position.z);
+        _lastColliderTouched = LeftCollider;
+        StartCoroutine(moveCamera(this.transform.position, endPos, duration));
     }
 
     private void moveCameraLeft()
     {
-        Vector3 endPos = new Vector3(camera.position.x - moveOffset, camera.position.y, camera.position.z);
-        StartCoroutine(moveCamera(camera.position, endPos, duration));
+        Vector3 endPos = new Vector3(this.transform.position.x - moveOffset, this.transform.position.y, this.transform.position.z);
+        _lastColliderTouched = RightCollider;
+        StartCoroutine(moveCamera(this.transform.position, endPos, duration));
     }
 
     private void MoveCameraUp() 
@@ -144,15 +178,18 @@ public class CameraController : MonoBehaviour
 
     public IEnumerator moveCamera(Vector3 startPos, Vector3 endPos, float duration)
     {
+        isMoving = true;
         float elapsed = 0;
         float t = 0;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             t = (elapsed / duration);
-            camera.position = Vector3.Lerp(startPos, endPos, t);
+            this.transform.position = Vector3.Lerp(startPos, endPos, t);
             yield return null;
         }
+        isMoving = false;
+
     }
 
     private void SwitchScenes()
@@ -186,55 +223,9 @@ public class CameraController : MonoBehaviour
         FollowPlayerX = b;
     }
 
-    public void SetOffsets(float camOffsetX, float camOffsetY)
-    { 
-        this.camOffsetX = camOffsetX;
-        this.camOffsetY = camOffsetY;
-    }
-
-    public void SetOffsetX(float camOffsetX)
-    {
-        this.camOffsetX = camOffsetX;
-    }
-
     public void SetOffsetY(float camOffsetY) 
     {
         this.camOffsetY = camOffsetY;
-    }
-
-    public IEnumerator LerpOffset(float duration)
-    {
-        Vector3 startOffset = Vector3.zero;
-        Vector3 targetOffset = new Vector3(camOffsetX, camOffsetY, 0f);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
-            camOffset = Vector3.Lerp(startOffset, targetOffset, t);
-            yield return null;
-        }
-    }
-
-    public IEnumerator LerpOffset(float duration, float offsetX, float offsetY)
-    {
-        Vector3 startOffset = Vector3.zero;
-        Vector3 targetOffset = new Vector3(offsetX, offsetY, 0f);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            camOffset = Vector3.Lerp(startOffset, targetOffset, t);
-            yield return null;
-        }
-    }
-
-    public void FixOffset(float duration)
-    {
-        StartCoroutine(LerpOffset(duration));
     }
 
     public IEnumerator ZoomCamera(float newSize, float duration) 
@@ -252,6 +243,12 @@ public class CameraController : MonoBehaviour
 
         // Just to be sure it's exactly at the target
         Camera.main.orthographicSize = newSize;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(boxCenter, boxSize);
     }
 
 }

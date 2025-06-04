@@ -176,6 +176,10 @@ public class CharacterController : MonoBehaviour
         }
 
         #endregion
+
+        #region Mobile Input
+        #endregion
+
         //Reseti is jumping -> causing wall problems
         if (moveInput.x != 0)
             CheckFacingDirection(moveInput.x > 0);
@@ -349,6 +353,19 @@ public class CharacterController : MonoBehaviour
         new DebugItem<bool>("IsSliding", IsSliding);
         new DebugItem<float>("Walljmp time", (Time.time - _wallJumpStartTime));
         new DebugItem<float>("HangTime",HangTime);
+    }
+
+    public void HandleMobileInput(GameObject button)
+    {
+        if (button.name.Equals("MoveLeft"))
+        { 
+            moveInput.x = -1;
+            Debug.Log("MoveLeft");
+        }
+        else if (button.name.Equals("MoveRight"))
+            moveInput.x = 1;
+
+        //Debug.Log("Button pressed: " + button.name);
     }
 
     private void Run(float lerpAmount)
