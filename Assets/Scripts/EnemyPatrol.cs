@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Windows.Speech;
 
 public class EnemyPatrol : MonoBehaviour
 {
@@ -28,8 +27,12 @@ public class EnemyPatrol : MonoBehaviour
     [SerializeField] private float followSpeed;
     private float distance;
 
-    private Animator animator;
+    [Header("SFX")]
+    [SerializeField] private AudioClip hurt;
+    [SerializeField] private AudioClip death;
 
+    private Animator animator;
+    private float health = 3f;
     private void Awake()
     {
         try
@@ -125,6 +128,25 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
+    private void HandleHit()
+    {
+        health--;
+        if (health <= 0)
+        {
+            SFXManager.Instance.PlaySFXClip(death, transform, 1f);
+            Destroy(gameObject);
+        }else
+            SFXManager.Instance.PlaySFXClip(hurt, transform, 1f);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Collided with enemy: " + collision.tag);
+        if (collision.CompareTag("Arrow"))
+        { 
+            HandleHit();
+        }
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;

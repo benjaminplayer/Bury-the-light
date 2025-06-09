@@ -1,2 +1,13 @@
 fileFormatVersion: 2
 guid: b9af4590b4024eb4ab91999e7e95709a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - hurtsfx: {fileID: 8300000, guid: 7fc2f1eb9c7fd8449960755560d00e56, type: 3}
+  - _sprite: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

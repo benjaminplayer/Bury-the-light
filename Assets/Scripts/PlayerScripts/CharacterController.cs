@@ -118,6 +118,10 @@ public class CharacterController : MonoBehaviour
 
     [SerializeField] private ParticleSystem particleSystem;
 
+    #region SFX
+    [SerializeField] private AudioClip jumpSFX;
+    #endregion
+
     private Rigidbody2D rb;
     Animator animator;
     private Collider2D platformHit;
@@ -506,7 +510,7 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isGrounded", false);
         animator.SetTrigger("jump");
         #endregion
-
+        SFXManager.Instance.PlaySFXClip(jumpSFX,transform,1f);
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse); // Doda force na rb v vertikalo
         #endregion
     }

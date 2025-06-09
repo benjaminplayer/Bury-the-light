@@ -74,10 +74,9 @@ public class Arrow : MonoBehaviour
 
         if (collision.CompareTag("Enemy"))
         {
-            HandleEnemyHit(collision.gameObject);
+            //HandleEnemyHit(collision.gameObject);
         }
 
-        Debug.Log("Arrow HIT something else!");
         this.gameObject.SetActive(false);
         Destroy(this.gameObject);
     }
