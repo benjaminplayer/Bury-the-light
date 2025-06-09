@@ -199,10 +199,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointA: {fileID: 2272203729127615010}
   pointB: {fileID: 51499157585487160}
-  speed: 2
   HorizontalMovement: 0
   VerticalMovement: 0
+  speed: 2
   _WaitBeforeMoving: 0
+  waitTime: 0
   followTarget: 0
   target: {fileID: 0}
   maxDetectionDistance: 0

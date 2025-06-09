@@ -155,10 +155,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca727398b63e8f64c864ec870043701a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera: {fileID: 8970694978824742379}
-  LeftTrigger: {fileID: 8458334934613106038}
-  RightTrigger: {fileID: 3565494380392640219}
   duration: 0.2
+  LeftCollider: {fileID: 0}
+  RightCollider: {fileID: 0}
   BottomCollider: {fileID: 3103828562588077819}
   TopCollider: {fileID: 0}
   entryPos: {x: 0, y: 0}

@@ -21,7 +21,7 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - Ground
@@ -71,6 +71,9 @@ TagManager:
     locked: 0
   - name: ChatBubble
     uniqueID: 1486833341
+    locked: 0
+  - name: UI
+    uniqueID: 504866201
     locked: 0
   m_RenderingLayers:
   - Default

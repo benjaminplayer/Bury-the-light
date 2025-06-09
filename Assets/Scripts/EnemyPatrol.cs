@@ -1,35 +1,56 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Windows.Speech;
 
 public class EnemyPatrol : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-
-    [SerializeField]
-    private GameObject pointA, pointB;
+    [Header("Point references")]
+    [Tooltip("The player will firstly move towards point B")]
+    [SerializeField] private GameObject pointA; 
+    [SerializeField] private GameObject pointB;
     private Rigidbody2D rb;
     private Transform currentPoint;
 
-    [SerializeField]
-    private float speed;
+    [Header("Movement properties")]
     [SerializeField] private bool HorizontalMovement;
     [SerializeField] private bool VerticalMovement;
-    [SerializeField] private bool _WaitBeforeMoving;
-    private bool _CanMove = true;
+    [SerializeField] private float speed;
 
-    [SerializeField] private bool followTarget;
+    [Header("Wait properties")]
+    [SerializeField] private bool _WaitBeforeMoving;
+    [SerializeField][Range(0.1f, 10f)] private float waitTime;
 
     [Header("Follow AI values")]
+    [SerializeField] private bool followTarget;
     [SerializeField] private Transform target;
     [SerializeField] private float maxDetectionDistance;
     [SerializeField] private float followSpeed;
     private float distance;
+
+    private Animator animator;
+
+    private void Awake()
+    {
+        try
+        {
+            animator = GetComponent<Animator>();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("Could Not have fetched animator\n"+ e.StackTrace);
+        }
+    }
 
     private void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
         if (!followTarget)
             currentPoint = pointB.transform;
+
+        if (!followTarget)
+            StartCoroutine(Movement());
+
     }
 
     // Update is called once per frame
@@ -45,80 +66,63 @@ public class EnemyPatrol : MonoBehaviour
 
 
             if (distance < maxDetectionDistance)
-            { 
+            {
                 transform.position = Vector2.MoveTowards(this.transform.position, target.position, followSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(Vector3.forward * angle);
             }
 
-            return;
-        }
-
-        Vector2 point = currentPoint.position - transform.position;
-        if (HorizontalMovement)
-        {
-            if (currentPoint == pointB.transform) // preveri ali je trenutna tocka tocka B(Desna tocka)
-            {
-                rb.linearVelocity = new Vector2(speed, 0); // ce je nastavi hitrost tako, da se premika v desni smeri
-            }
-            else
-            {
-                rb.linearVelocity = new Vector2(-speed, 0); // ce ni obrne smer premikanja
-            }
-
-            if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f && currentPoint == pointB.transform) //pogleda ali je enemy prisel do pointB (Desna tocka)
-            {
-                currentPoint = pointA.transform; // ce je nastavi da je naslednja tocka A
-                //transform.localScale = new Vector3(-1, 1, 1);
-                transform.localScale = new Vector3(- this.transform.localScale.x, 1, 1);
-            }
-
-            if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f && currentPoint == pointA.transform) //pogleda ali je enemy prisel do pointA (Leva tocka)
-            {
-                currentPoint = pointB.transform; // ce je nastavi da je naslednja tocka
-                //transform.localScale = new Vector3(1, 1, 1);
-                transform.localScale = new Vector3(-this.transform.localScale.x, 1, 1);
-            }
-
-        }
-        else if (VerticalMovement)
-        {
-            if (_CanMove)
-            { 
-                if (currentPoint == pointB.transform)
-                    rb.linearVelocity = new Vector2(0, speed);
-                else if(currentPoint != pointB.transform)
-                    rb.linearVelocity = new Vector2(0, -speed);
-                if (Vector2.Distance(transform.position, currentPoint.position) < .5f && currentPoint == pointB.transform)
-                {
-                    if (_WaitBeforeMoving)
-                    {
-                        _CanMove = false;
-                        StartCoroutine(WaitBeforeMoving(pointA.transform));
-                    }
-                    else
-                        currentPoint = pointA.transform;
-                }
-                if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f && currentPoint == pointA.transform)
-                {
-                    if (_WaitBeforeMoving)
-                    {
-                        _CanMove = false;
-                        StartCoroutine(WaitBeforeMoving(pointB.transform));
-                    }
-                    else
-                        currentPoint = pointB.transform;
-                }            
-            }else
-                rb.linearVelocity = Vector2.zero;
         }
 
     }
 
-    private IEnumerator WaitBeforeMoving(Transform newPoint)
+    private IEnumerator Movement()
     {
-        yield return new WaitForSeconds(2);
-        currentPoint = newPoint;
-        _CanMove = true;
+        while (true)
+        {
+            Vector2 moveDir = Vector2.zero;
+
+            if (HorizontalMovement)
+            {
+                if(animator !=null)
+                    animator.Play("test");
+                if (currentPoint == pointB.transform)
+                    moveDir = Vector2.right;
+                else
+                    moveDir = Vector2.left;
+            }
+            else if (HorizontalMovement)
+            { 
+                if(currentPoint == pointB.transform)
+                    moveDir = Vector2.up;
+                else
+                    moveDir = Vector2.down;
+            }
+
+
+                rb.linearVelocity = moveDir * speed;
+
+            while (Vector2.Distance(transform.position, currentPoint.position) > .5f)
+            {
+                yield return null;
+            }
+
+            rb.linearVelocity = Vector2.zero;
+
+            if (_WaitBeforeMoving)
+            {
+                if(animator != null)
+                    animator.Play("idle");
+                yield return new WaitForSeconds(waitTime);
+            }
+
+            if (HorizontalMovement)
+            {
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y);
+            }
+
+            currentPoint = (currentPoint == pointB.transform) ? pointA.transform : pointB.transform;
+
+        }
     }
 
     private void OnDrawGizmos()

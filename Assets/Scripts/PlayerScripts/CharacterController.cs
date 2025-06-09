@@ -76,12 +76,15 @@ public class CharacterController : MonoBehaviour
 
     private bool _isJumpCut;
 
+
     [SerializeField]
     private bool _isAlive = true;
     public bool canMove = true;
     private Collider2D usableInTrigger;
 
-    
+    public bool isOnPlatform;
+    public Rigidbody2D platRB;
+
 
     #region Timers init
     public float LastOnGroundTime { get; private set; }
@@ -95,7 +98,7 @@ public class CharacterController : MonoBehaviour
     #region Checks
     [Header("Ground Checks")]
     [SerializeField] private Transform _groundCheckPoint;
-    [SerializeField] private Vector2 _groundCheckSize = new Vector2(.49f, .03f);
+                     public Vector2 _groundCheckSize = new Vector2(.49f, .03f);
     [SerializeField] private Transform _rightWallCheck;
     [SerializeField] private Transform _leftWallCheck;
     [SerializeField] private Vector2 _WallCheckSize;
@@ -187,7 +190,6 @@ public class CharacterController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && canMove)
             OnJump();
 
-        animator.SetFloat("yVelocity", rb.linearVelocityY);
         if (!IsJumping)
         {
             platformHit = Physics2D.OverlapBox(_groundCheckPoint.position, _groundCheckSize, 0, _groundLayer);
@@ -205,13 +207,9 @@ public class CharacterController : MonoBehaviour
                 animator.SetBool("isGrounded", false);
             }
 
-            if (platformHit != null && platformHit.CompareTag("MovingPlatform"))
-            {
-                //player.transform.SetParent(platform);
-                transform.SetParent(platformHit.transform);
-            }
-
         }
+        if(platformHit != null && !platformHit.CompareTag("MovingPlatform"))
+            animator.SetFloat("yVelocity", rb.linearVelocityY);
 
         // Right wall intersection heck
         if ((Physics2D.OverlapBox(_rightWallCheck.position, _WallCheckSize, 0, _groundLayer) && IsFacingRight) || (Physics2D.OverlapBox(_leftWallCheck.position, _WallCheckSize, 0, _groundLayer) && !IsFacingRight) && !IsWallJumping)
@@ -370,12 +368,12 @@ public class CharacterController : MonoBehaviour
 
     private void Run(float lerpAmount)
     {
+        Vector2 platVel = Vector2.zero;
+
         // Dobi desired speed
         float targetSpeed = moveInput.x * moveSpeed; // Izracuna difference med desired speed in current speed
         targetSpeed = Mathf.Lerp(rb.linearVelocityX, targetSpeed, lerpAmount); // doda linearno interpolacijo med trenutno in zeleno hitrostijo
-
-        //debugTMP.SetText("Current speed: " + rb.linearVelocityX + "\nTarget speed: " + targetSpeed +"\n lerp amount: "+lerpAmount +" | is WallJumping? "+IsWallJumping);
-
+        
         #region Calc Acceleration Rate
         float accelerationRate;
 
@@ -384,6 +382,10 @@ public class CharacterController : MonoBehaviour
         else
             accelerationRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration * airAcceleration : decceleration * airDecceleration;
         #endregion
+
+        float speedDiff = targetSpeed - rb.linearVelocityX; // Dobi kako hitro more character ali pospesiti ali upocasniti
+
+        float movement = speedDiff * accelerationRate;
 
         #region Set animations for the character based on its speed
 
@@ -411,14 +413,40 @@ public class CharacterController : MonoBehaviour
         }
         #endregion
 
-        float speedDif = targetSpeed - rb.linearVelocityX; // Dobi kako hitro more character ali pospesiti ali upocasniti
-        float movement = speedDif * accelerationRate;
         // Doda silo na characterja
+        if (platformHit != null && platformHit.CompareTag("MovingPlatform") && !IsJumping)
+        {
+            FloatingPlatforms platform = platformHit.GetComponent<FloatingPlatforms>();
+            platVel = platform.platVel;
 
-        rb.AddForce(movement * Vector2.right); //Vector2.right -> affecta samo x os
+            if (platform.verticalMovement)
+            {
+                rb.AddForce(movement * Vector2.right); //Vector2.right -> affecta samo x os*/
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, platVel.y);
+            }
+            else if (platform.horizontalMovement)
+            {
+                Debug.Log("PlatVel:" + platVel);
+                if (moveInput.x != 0)
+                    rb.AddForce(Vector2.right * movement);
+                else
+                {
+                    animator.SetFloat("yVelocity",0);
+                    animator.SetBool("isMoving", false);
+                    rb.linearVelocity = new Vector2(platVel.x, rb.linearVelocityY);
+                }
+
+            }
+
+        }
+        else 
+        {
+            rb.AddForce(movement * Vector2.right); //Vector2.right -> affecta samo x os*/
+        }
+
         Debug.DrawRay(transform.position, (movement * Vector2.right) * 0.1f, Color.green, 0.1f);
-
     }
+
 
     public void setGravityScale(float newScale)
     {
@@ -680,7 +708,7 @@ public class CharacterController : MonoBehaviour
         {
             CameraController cc = Camera.main.GetComponent<CameraController>();
             cc.SetFollowCam(false);
-            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(44.55f, -35f, Camera.main.transform.position.z), 1f));
+            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(44f, -35f, Camera.main.transform.position.z), 1f));
             StartCoroutine(cc.ZoomCamera(10f, 1f));
         }
 
@@ -731,6 +759,7 @@ public class CharacterController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(_groundCheckPoint.transform.position, _groundCheckSize);
         Gizmos.DrawWireCube(_rightWallCheck.transform.position, _WallCheckSize);
         Gizmos.DrawWireCube(_leftWallCheck.transform.position, _WallCheckSize);
     }

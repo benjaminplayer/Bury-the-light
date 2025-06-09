@@ -21,10 +21,9 @@ public class FloatingPlatforms : MonoBehaviour
     [Range(.1f, 20f)]
     private float duration;
 
-    [SerializeField]
-    private bool horizontalMovement;
-    [SerializeField]
-    private bool verticalMovement;
+    public bool horizontalMovement;
+    public bool verticalMovement;
+    
     [SerializeField]
     private bool isContinous;
 
@@ -37,14 +36,15 @@ public class FloatingPlatforms : MonoBehaviour
     [SerializeField]
     private bool canMove = true;
 
-    private CharacterController cr;
-    private GameObject player;
-
     private Vector3 _startPos;
     private Vector3 lastpos;
     public Vector3 velocity { get; private set; }
     public float speed => velocity.magnitude;
+    public Vector2 platVel;
     public float horizontalSpeedBoost = 1.1f;
+
+    private readonly float platCheckSizeY = 0.2f;
+    private Vector2 initialCheckSize = Vector2.zero;
 
     private void Awake()
     {
@@ -74,44 +74,29 @@ public class FloatingPlatforms : MonoBehaviour
         }
     }
 
-    #region BasicMovements
-    IEnumerator movePlatformVertically(Transform platform, Vector3 endpos, float duration)
+    private IEnumerator MovePlatform(Rigidbody2D rb, Vector3 endPos)
     {
-        canMove = false;
+        Vector3 startPos = rb.position;
+        Vector3 lastPos = startPos;
 
-        float elapsed = 0f;
-        Vector3 startpos = platform.position;
-        Vector3 previousPos = platform.position;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            platform.position = Vector3.Lerp(startpos, endpos, t);
-
-            previousPos = platform.position;
-            yield return null;
-        }
-
-    }
-
-    private IEnumerator MovePlatformHorizontally(Transform platform, Vector3 endpos, float duration)
-    {
-        canMove = false;
-        Vector2 startpos = transform.position;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
-            platform.position = Vector2.Lerp(startpos, endpos, t);
+            Vector3 newPos = Vector3.Lerp(startPos, endPos, t);
 
-            yield return null;
+            platVel = (newPos - lastPos) / Time.deltaTime;
+            lastPos = newPos;
+
+            // Move platform using physics-aware method
+            rb.MovePosition(newPos);
+            yield return new WaitForFixedUpdate();
+
         }
-
+        platVel = Vector3.zero;
     }
-    #endregion
 
     #region Indefinite Movement
     IEnumerator hoverBetweenValuesVertically(Transform platform, float dy, float speed)
@@ -162,39 +147,45 @@ public class FloatingPlatforms : MonoBehaviour
 
     #endregion
 
-    #region Collision Triggers
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!moveOnTouch) return;
         if (collision.collider.CompareTag("Player") && !IsMoving)
         {
-            Debug.Log(GetArgs());
+            var cc = collision.gameObject.GetComponent<CharacterController>();
+            initialCheckSize = cc._groundCheckSize;
+            cc._groundCheckSize = new Vector2(initialCheckSize.x, platCheckSizeY);
             StartCoroutine(Movement()); // test dis
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+
+        if (collision.collider.CompareTag("Player"))
+        {
+            var cc = collision.gameObject.GetComponent<CharacterController>();
+            cc._groundCheckSize = initialCheckSize;
         }
     }
 
     private IEnumerator ResetPosition()
     {
-        Debug.Log("Reset position");
         yield return new WaitForSeconds(2);
-        yield return StartCoroutine(movePlatformVertically(platform, _startPos, duration));
+        yield return StartCoroutine(MovePlatform(this.GetComponent<Rigidbody2D>(), _startPos));
         _startPos = transform.position;
     }
 
-    #endregion
 
     public IEnumerator Movement() // trigger movement in pole vrni platform na originalen position
     {
         _startPos = transform.position;
-        
-        if (verticalMovement)
-        {
-            IsMoving = true;
-            yield return StartCoroutine(movePlatformVertically(platform, transform.position + new Vector3(0, verticalChange), duration));
-        }
-        else if(horizontalMovement)
-            yield return StartCoroutine(MovePlatformHorizontally(platform, transform.position + new Vector3(horizontalChange, 0), duration));
+        IsMoving = true;
+
+        Vector3 change = (horizontalMovement) ? (transform.position + new Vector3(horizontalChange, 0)) : (transform.position + new Vector3(0, verticalChange));
+        yield return StartCoroutine(MovePlatform(this.GetComponent<Rigidbody2D>(), change));
         yield return ResetPosition();
+        
         IsMoving = false;
     }
 
