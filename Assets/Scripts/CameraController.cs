@@ -48,10 +48,23 @@ public class CameraController : MonoBehaviour
     Vector2 boxSize = Vector2.zero;
     Vector2 boxCenter = Vector2.zero;
 
+    [SerializeField] private AudioClip clip;
+
     public static bool IsEndOfLevel = false;
 
     private void Awake()
     {
+        switch (SceneManager.GetActiveScene().name)
+        {
+            case "CavernLevel":
+                SFXManager.Instance.PlaySFXClip(clip,this.transform, .5f, true);
+                break;
+            default:
+                break;
+        }
+        
+
+
         cam = this.GetComponent<Camera>();
 
         camOffset = new Vector3(camOffsetX, camOffsetY);

@@ -31,6 +31,9 @@ public class EnemyPatrol : MonoBehaviour
     [SerializeField] private AudioClip hurt;
     [SerializeField] private AudioClip death;
 
+    [Header("VFX")]
+    [SerializeField] private DamageFlash flashScript;
+
     private Animator animator;
     private float health = 3f;
     private void Awake()
@@ -38,6 +41,8 @@ public class EnemyPatrol : MonoBehaviour
         try
         {
             animator = GetComponent<Animator>();
+            if(flashScript == null)
+                flashScript = GetComponent<DamageFlash>();
         }
         catch (System.Exception e)
         {
@@ -131,6 +136,9 @@ public class EnemyPatrol : MonoBehaviour
     private void HandleHit()
     {
         health--;
+
+        flashScript.CallDamageFlash();
+
         if (health <= 0)
         {
             SFXManager.Instance.PlaySFXClip(death, transform, 1f);

@@ -208,6 +208,9 @@ MonoBehaviour:
   target: {fileID: 0}
   maxDetectionDistance: 0
   followSpeed: 0
+  hurt: {fileID: 0}
+  death: {fileID: 0}
+  flashScript: {fileID: 0}
 --- !u!1 &2272203729127615010
 GameObject:
   m_ObjectHideFlags: 0

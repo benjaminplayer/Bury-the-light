@@ -119,7 +119,10 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private ParticleSystem particleSystem;
 
     #region SFX
+    [Header("SFX")]
     [SerializeField] private AudioClip jumpSFX;
+    [SerializeField] private AudioClip hurt;
+    [SerializeField] private AudioClip bowPull;
     #endregion
 
     private Rigidbody2D rb;
@@ -254,6 +257,7 @@ public class CharacterController : MonoBehaviour
             IsJumping = true;
             _isJumpCut = false;
             IsWallJumping = false;
+            SFXManager.Instance.PlaySFXClip(jumpSFX, transform, 1f);
             jump();
         }
         else if (CanWallJump() && LastJumpTime > 0)
@@ -510,13 +514,15 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isGrounded", false);
         animator.SetTrigger("jump");
         #endregion
-        SFXManager.Instance.PlaySFXClip(jumpSFX,transform,1f);
+        
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse); // Doda force na rb v vertikalo
         #endregion
     }
 
     private void WallJump(float dir)
     {
+        SFXManager.Instance.PlaySFXClip(jumpSFX, transform, 1f);
+
         LastJumpTime = 0;
         LastOnGroundTime = 0;
         LastOnRightWallTime = 0;
@@ -569,6 +575,7 @@ public class CharacterController : MonoBehaviour
     {
         if (CanFire())
         {
+            SFXManager.Instance.PlaySFXClip(bowPull,transform,1f);
             IsFiring = true;
             animator.SetTrigger("fireBow");
             StartCoroutine(WaitForEndOfAnim("player_bow_ground"));
@@ -632,6 +639,7 @@ public class CharacterController : MonoBehaviour
 
     public void OnHit()
     {
+        SFXManager.Instance.PlaySFXClip(hurt,this.transform,1f);
         animator.Play("Fall");
         canMove = false;
         rb.linearVelocity= new Vector2(0, rb.linearVelocityY);

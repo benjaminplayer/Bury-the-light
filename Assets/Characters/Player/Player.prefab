@@ -5158,3 +5158,6 @@ MonoBehaviour:
   jumpBufferTime: 0.01
   _useStartPos: 0
   particleSystem: {fileID: 8220614284121299403}
+  jumpSFX: {fileID: 0}
+  hurt: {fileID: 0}
+  bowPull: {fileID: 0}
