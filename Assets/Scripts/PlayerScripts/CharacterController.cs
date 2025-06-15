@@ -728,7 +728,7 @@ public class CharacterController : MonoBehaviour
         {
             CameraController cc = Camera.main.GetComponent<CameraController>();
             cc.SetFollowCamX(false);
-            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(222.3279f, -15f, Camera.main.transform.position.z), 1f));
+            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(223f, -15f, Camera.main.transform.position.z), 1f));
             StartCoroutine(cc.ZoomCamera(10f, 1f));
             CameraController.IsEndOfLevel = false;
 

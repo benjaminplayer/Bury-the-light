@@ -5121,7 +5121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   debugTMP: {fileID: 0}
-  moveSpeed: 11
+  moveSpeed: 10
   acceleration: 3.4
   decceleration: 5.98
   velPower: 1.05
@@ -5158,6 +5158,6 @@ MonoBehaviour:
   jumpBufferTime: 0.01
   _useStartPos: 0
   particleSystem: {fileID: 8220614284121299403}
-  jumpSFX: {fileID: 0}
-  hurt: {fileID: 0}
-  bowPull: {fileID: 0}
+  jumpSFX: {fileID: 8300000, guid: 4ea3388c83f84fd4797ae636143dd231, type: 3}
+  hurt: {fileID: 8300000, guid: 40ae26a4194ef5b41a33aed92d8c3461, type: 3}
+  bowPull: {fileID: 8300000, guid: 12e42d1116a4aaa4992e0b6f7cc701d7, type: 3}

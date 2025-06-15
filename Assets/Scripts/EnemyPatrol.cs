@@ -137,14 +137,20 @@ public class EnemyPatrol : MonoBehaviour
     {
         health--;
 
-        flashScript.CallDamageFlash();
+        if(flashScript != null)
+            flashScript.CallDamageFlash();
 
         if (health <= 0)
         {
-            SFXManager.Instance.PlaySFXClip(death, transform, 1f);
+            if (death != null)
+                SFXManager.Instance.PlaySFXClip(death, transform, 1f);
             Destroy(gameObject);
-        }else
-            SFXManager.Instance.PlaySFXClip(hurt, transform, 1f);
+        }
+        else
+        {
+            if (hurt != null)
+                SFXManager.Instance.PlaySFXClip(hurt, transform, 1f);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
