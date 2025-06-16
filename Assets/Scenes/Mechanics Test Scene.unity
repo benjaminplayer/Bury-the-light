@@ -2467,11 +2467,13 @@ MonoBehaviour:
   horizontalSpeed: 0
   duration: 2.14
   horizontalMovement: 0
-  verticalMovement: 1
+  verticalMovement: 0
   isContinous: 0
-  moveOnTouch: 1
+  moveOnTouch: 0
   IsMoving: 0
   canMove: 1
+  fallAfterTouch: 1
+  _waitTime: 2
   platVel: {x: 0, y: 0}
   horizontalSpeedBoost: 1.1
 --- !u!66 &1304020427

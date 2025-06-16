@@ -23,7 +23,10 @@ public class MyEditor : Editor
         SerializedProperty IsMoving = serializedObject.FindProperty("IsMoving");
         SerializedProperty canMove = serializedObject.FindProperty("canMove");
         SerializedProperty isContinous = serializedObject.FindProperty("isContinous");
+        SerializedProperty fallAfterTouch = serializedObject.FindProperty("fallAfterTouch");
+        SerializedProperty _waitTime = serializedObject.FindProperty("_waitTime");
         #endregion
+
         // Draw all properties
         EditorGUILayout.PropertyField(platformProp);
         EditorGUILayout.PropertyField(horizontalMovementProp);
@@ -58,6 +61,10 @@ public class MyEditor : Editor
         EditorGUILayout.PropertyField(IsMoving);
         EditorGUILayout.PropertyField(canMove);
         // Apply changes to the serialized object
+
+        EditorGUILayout.PropertyField(fallAfterTouch);
+        EditorGUILayout.PropertyField(_waitTime);
+
         serializedObject.ApplyModifiedProperties();
 
     }

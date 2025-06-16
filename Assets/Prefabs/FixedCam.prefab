@@ -168,6 +168,7 @@ MonoBehaviour:
   camOffsetX: 0
   camOffsetY: 0
   camOffset: {x: 0, y: 0, z: 0}
+  clip: {fileID: 0}
 --- !u!50 &8902648215824836098
 Rigidbody2D:
   serializedVersion: 5

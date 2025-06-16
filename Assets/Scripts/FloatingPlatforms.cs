@@ -36,6 +36,13 @@ public class FloatingPlatforms : MonoBehaviour
     [SerializeField]
     private bool canMove = true;
 
+    #region Falling Plat logic
+    [SerializeField] private bool fallAfterTouch = false;
+    [SerializeField] private float _waitTime = 0f;
+    private bool startedFallCountdown = false;
+    private Coroutine fallingCoroutine;
+    #endregion
+
     private Vector3 _startPos;
     private Vector3 lastpos;
     public Vector3 velocity { get; private set; }
@@ -152,6 +159,18 @@ public class FloatingPlatforms : MonoBehaviour
         if (!moveOnTouch) return;
         if (collision.collider.CompareTag("Player") && !IsMoving)
         {
+
+            if (fallAfterTouch && !startedFallCountdown)
+            {
+                startedFallCountdown = true;
+                fallingCoroutine = StartCoroutine(FallAfterSeconds());
+            }
+            else if(fallAfterTouch && fallingCoroutine !=null)
+            {
+                StopCoroutine(fallingCoroutine);
+                fallingCoroutine = StartCoroutine(FallAfterSeconds());
+            }
+
             var cc = collision.gameObject.GetComponent<CharacterController>();
             initialCheckSize = cc._groundCheckSize;
             cc._groundCheckSize = new Vector2(initialCheckSize.x, platCheckSizeY);
@@ -166,6 +185,7 @@ public class FloatingPlatforms : MonoBehaviour
         {
             var cc = collision.gameObject.GetComponent<CharacterController>();
             cc._groundCheckSize = initialCheckSize;
+
         }
     }
 
@@ -187,6 +207,16 @@ public class FloatingPlatforms : MonoBehaviour
         yield return ResetPosition();
         
         IsMoving = false;
+    }
+
+    private IEnumerator FallAfterSeconds()
+    {
+        Debug.Log("Tgis name "+this.name);
+        yield return new WaitForSeconds(_waitTime);
+        duration = .5f;
+        yield return StartCoroutine(MovePlatform(this.GetComponent<Rigidbody2D>(), this.transform.position - new Vector3(0,40)));
+        startedFallCountdown = false;
+        yield return null;
     }
 
     #region SetterMethods
