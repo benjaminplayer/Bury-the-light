@@ -53,18 +53,7 @@ public class CameraController : MonoBehaviour
     public static bool IsEndOfLevel = false;
 
     private void Awake()
-    {
-        switch (SceneManager.GetActiveScene().name)
-        {
-            case "CavernLevel":
-                SFXManager.Instance.PlaySFXClip(clip,this.transform, .5f, true);
-                break;
-            default:
-                break;
-        }
-        
-
-
+    {        
         cam = this.GetComponent<Camera>();
 
         camOffset = new Vector3(camOffsetX, camOffsetY);
@@ -80,6 +69,18 @@ public class CameraController : MonoBehaviour
         cameraWidth = cameraHeight * Screen.width / Screen.height;
         moveOffset = cameraWidth;
 
+    }
+
+    private void Start()
+    {
+        switch (SceneManager.GetActiveScene().name)
+        {
+            case "CavernLevel":
+                SFXManager.Instance.PlaySFXClip(clip, this.transform, .5f, true);
+                break;
+            default:
+                break;
+        }
     }
 
     private void LateUpdate()
@@ -239,6 +240,11 @@ public class CameraController : MonoBehaviour
     public void SetOffsetY(float camOffsetY) 
     {
         this.camOffsetY = camOffsetY;
+    }
+
+    public float GetCameraOrtSize()
+    {
+        return this.newSize;
     }
 
     public IEnumerator ZoomCamera(float newSize, float duration) 

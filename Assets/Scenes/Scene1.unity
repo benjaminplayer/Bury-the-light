@@ -3740,6 +3740,9 @@ MonoBehaviour:
   moveOnTouch: 1
   IsMoving: 0
   canMove: 1
+  _dontReturn: 0
+  fallAfterTouch: 0
+  _waitTime: 0
   platVel: {x: 0, y: 0}
   horizontalSpeedBoost: 1.1
 --- !u!19719996 &475224593
@@ -3984,11 +3987,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2687791917881655457, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.53
+      value: 166.2
       objectReference: {fileID: 0}
     - target: {fileID: 2687791917881655457, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -15.11
+      value: -2.9
       objectReference: {fileID: 0}
     - target: {fileID: 2687791917881655457, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4028,11 +4031,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6053706471205725627, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 167.6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6053706471205725627, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 12.06
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6053706471205725627, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6802,6 +6809,9 @@ MonoBehaviour:
   moveOnTouch: 0
   IsMoving: 0
   canMove: 1
+  _dontReturn: 0
+  fallAfterTouch: 0
+  _waitTime: 0
   platVel: {x: 0, y: 0}
   horizontalSpeedBoost: 1.1
 --- !u!1839735485 &1724192039
@@ -31925,7 +31935,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2687791917881655457, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.53
+      value: -4.59
       objectReference: {fileID: 0}
     - target: {fileID: 2687791917881655457, guid: c433bcd7ef0b7d842bcbd122181ccb08, type: 3}
       propertyPath: m_LocalPosition.y

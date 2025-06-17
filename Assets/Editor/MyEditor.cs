@@ -25,6 +25,7 @@ public class MyEditor : Editor
         SerializedProperty isContinous = serializedObject.FindProperty("isContinous");
         SerializedProperty fallAfterTouch = serializedObject.FindProperty("fallAfterTouch");
         SerializedProperty _waitTime = serializedObject.FindProperty("_waitTime");
+        SerializedProperty _dontReturn = serializedObject.FindProperty("_dontReturn");
         #endregion
 
         // Draw all properties
@@ -37,6 +38,7 @@ public class MyEditor : Editor
             EditorGUILayout.PropertyField(horizontalChangeProp);
 
             EditorGUILayout.PropertyField(isContinous);
+            EditorGUILayout.PropertyField(_dontReturn);
             if (isContinous.boolValue)
                 EditorGUILayout.PropertyField(horizontalSpeedProp);
 
@@ -49,6 +51,7 @@ public class MyEditor : Editor
         {
             EditorGUILayout.PropertyField(verticalChangeProp);
             EditorGUILayout.PropertyField(isContinous);
+            EditorGUILayout.PropertyField(_dontReturn);
             if (isContinous.boolValue)
                 EditorGUILayout.PropertyField(verticalSpeedProp);
 

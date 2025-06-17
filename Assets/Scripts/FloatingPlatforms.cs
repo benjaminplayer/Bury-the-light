@@ -35,6 +35,8 @@ public class FloatingPlatforms : MonoBehaviour
 
     [SerializeField]
     private bool canMove = true;
+    [SerializeField] private bool _dontReturn;
+
 
     #region Falling Plat logic
     [SerializeField] private bool fallAfterTouch = false;
@@ -174,18 +176,19 @@ public class FloatingPlatforms : MonoBehaviour
             var cc = collision.gameObject.GetComponent<CharacterController>();
             initialCheckSize = cc._groundCheckSize;
             cc._groundCheckSize = new Vector2(initialCheckSize.x, platCheckSizeY);
+
             StartCoroutine(Movement()); // test dis
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-
+        if (!moveOnTouch) return;
         if (collision.collider.CompareTag("Player"))
         {
             var cc = collision.gameObject.GetComponent<CharacterController>();
             cc._groundCheckSize = initialCheckSize;
-
+            Debug.Log("Initiac cc: " + initialCheckSize);
         }
     }
 
@@ -204,7 +207,8 @@ public class FloatingPlatforms : MonoBehaviour
 
         Vector3 change = (horizontalMovement) ? (transform.position + new Vector3(horizontalChange, 0)) : (transform.position + new Vector3(0, verticalChange));
         yield return StartCoroutine(MovePlatform(this.GetComponent<Rigidbody2D>(), change));
-        yield return ResetPosition();
+        if(!_dontReturn)
+            yield return ResetPosition();
         
         IsMoving = false;
     }

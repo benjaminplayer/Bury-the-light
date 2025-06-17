@@ -17,6 +17,10 @@ TagManager:
   - GeneralCamReset
   - Arrow
   - Wall
+  - Destroyable
+  - FollowPlayer
+  - ResCam2
+  - CheckTNT
   layers:
   - Default
   - TransparentFX
@@ -26,7 +30,7 @@ TagManager:
   - UI
   - Ground
   - Usable
-  - 
+  - ExplosionRock
   - 
   - 
   - 

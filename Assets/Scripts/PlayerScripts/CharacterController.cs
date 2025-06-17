@@ -84,8 +84,9 @@ public class CharacterController : MonoBehaviour
 
     public bool isOnPlatform;
     public Rigidbody2D platRB;
-
-
+    private bool _usablePressed;
+    private Usable us;
+    public bool hasDynamite = false;
     #region Timers init
     public float LastOnGroundTime { get; private set; }
     public float LastJumpTime { get; private set; }
@@ -173,11 +174,8 @@ public class CharacterController : MonoBehaviour
 
         if (usableInTrigger != null && Input.GetKeyDown(KeyCode.E))
         {
-            Usable us = usableInTrigger.gameObject.GetComponent<Usable>();
-            
-            if(us != null)
-                us.triggerPlatformMovement();
-
+            Debug.Log("Usable pressed!");
+            _usablePressed = true;
         }
 
         if (Input.GetKeyDown(KeyCode.F))
@@ -359,6 +357,7 @@ public class CharacterController : MonoBehaviour
         new DebugItem<bool>("IsSliding", IsSliding);
         new DebugItem<float>("Walljmp time", (Time.time - _wallJumpStartTime));
         new DebugItem<float>("HangTime",HangTime);
+        new DebugItem<bool>("Usable pressed", _usablePressed);
     }
 
     public void HandleMobileInput(GameObject button)
@@ -721,7 +720,7 @@ public class CharacterController : MonoBehaviour
             CameraController cc = Camera.main.GetComponent<CameraController>();
             cc.SetFollowCam(false);
             StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(44f, -35f, Camera.main.transform.position.z), 1f));
-            StartCoroutine(cc.ZoomCamera(10f, 1f));
+            StartCoroutine(cc.ZoomCamera(cc.GetCameraOrtSize(), 1f));
         }
 
         if (collision.CompareTag("GeneralCamReset") && _Resetable) 
@@ -729,7 +728,7 @@ public class CharacterController : MonoBehaviour
             CameraController cc = Camera.main.GetComponent<CameraController>();
             cc.SetFollowCamX(false);
             StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(223f, -15f, Camera.main.transform.position.z), 1f));
-            StartCoroutine(cc.ZoomCamera(10f, 1f));
+            StartCoroutine(cc.ZoomCamera(cc.GetCameraOrtSize(), 1f));
             CameraController.IsEndOfLevel = false;
 
             _Resetable = false;
@@ -750,6 +749,35 @@ public class CharacterController : MonoBehaviour
             _Resetable = true;
         }
 
+        if (collision.CompareTag("FollowPlayer"))
+        {
+            CameraController cc = Camera.main.GetComponent<CameraController>();
+            StartCoroutine(cc.ZoomCamera(Camera.main.orthographicSize / 2, 0.2f));
+            cc.SetFollowCam(true);
+            _Resetable = true;
+        }
+
+        if (collision.CompareTag("ResCam2"))
+        {
+            CameraController cc = Camera.main.GetComponent<CameraController>();
+            cc.SetFollowCam(false);
+            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(36f, 5f, Camera.main.transform.position.z), 1f));
+            StartCoroutine(cc.ZoomCamera(cc.GetCameraOrtSize(), 1f));
+            CameraController.IsEndOfLevel = false;
+            _Resetable = false;
+        }
+
+        if (collision.CompareTag("CheckTNT"))
+        {
+            if (!hasDynamite)
+            {
+                collision.gameObject.GetComponent<DialectTrigger>().TriggerDialogue(true);
+            }
+            else
+            {
+                collision.gameObject.SetActive(false);
+            }
+        }
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -759,6 +787,40 @@ public class CharacterController : MonoBehaviour
             Debug.Log("Staying In Collision");
             usableInTrigger = collision;
         }
+
+
+        Debug.Log("Usable in trigger\n" + usableInTrigger);
+
+        if (_usablePressed)
+        {
+            us = usableInTrigger.gameObject.GetComponent<Usable>();
+            Debug.Log("us:\n" + us);
+     
+            if (collision.CompareTag("Lever"))
+            {
+                
+                us.TriggerPlatformMovement();
+            }
+
+            if (collision.CompareTag("PickUpTNT"))
+            {
+                Debug.Log("PickupTNT");
+                us.PickUpTNT(this.GetComponent<CharacterController>());
+            }
+
+            if (collision.CompareTag("Destroyable"))
+            {
+                if (hasDynamite)
+                { 
+                    Debug.Log("Trigger tnt");
+                    us.TriggerTNTPlace();
+                }
+            }
+
+        }
+
+        _usablePressed = false;
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)
