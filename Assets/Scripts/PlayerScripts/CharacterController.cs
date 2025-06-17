@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterController : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class CharacterController : MonoBehaviour
     public int health = 100;
 
     [SerializeField] private TextMeshPro debugTMP;
+
+    [Header("Mobile input buttons")]
+    [SerializeField] private MobileInputHandler _inputHandler;
 
     #region Action Values
     [Header("Action Values")]
@@ -149,6 +153,7 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(_inputHandler.GetHorizontalInput());
 
         if (!_isAlive)
         {
@@ -170,7 +175,10 @@ public class CharacterController : MonoBehaviour
 
         #region Input
         moveInput.x = canMove ? Input.GetAxisRaw("Horizontal") : 0;
+        //moveInput.x = _inputHandler.GetHorizontalInput();
         moveInput.y = canMove ? Input.GetAxisRaw("Vertical") : 0;
+
+        //moveInput = _inputHandler.GetInput();
 
         if (usableInTrigger != null && Input.GetKeyDown(KeyCode.E))
         {
@@ -178,7 +186,8 @@ public class CharacterController : MonoBehaviour
             _usablePressed = true;
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        //if (Input.GetKeyDown(KeyCode.F))
+        if(_inputHandler.UsePressed() || Input.GetKeyDown(KeyCode.F))
         {
             BowAttack();  
         }
@@ -192,7 +201,8 @@ public class CharacterController : MonoBehaviour
         if (moveInput.x != 0)
             CheckFacingDirection(moveInput.x > 0);
 
-        if (Input.GetKeyDown(KeyCode.Space) && canMove)
+        //if (Input.GetKeyDown(KeyCode.Space) && canMove)
+        if((Input.GetKeyDown(KeyCode.Space) || _inputHandler.JumpPressed()) && canMove)
             OnJump();
 
         if (!IsJumping)

@@ -5121,6 +5121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   debugTMP: {fileID: 0}
+  _inputHandler: {fileID: 0}
   moveSpeed: 10
   acceleration: 3.4
   decceleration: 5.98
@@ -5146,6 +5147,7 @@ MonoBehaviour:
   canMove: 1
   isOnPlatform: 0
   platRB: {fileID: 0}
+  hasDynamite: 0
   _groundCheckPoint: {fileID: 2544728145794237327}
   _groundCheckSize: {x: 0.49, y: 0.03}
   _rightWallCheck: {fileID: 5064230245582666257}
