@@ -1,12 +1,12 @@
 # ninja log v5
-54	491	7718971896598237	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	1933642d2a783170
-492	758	7718971899305568	E:/Unity gamez/2D/Bury the light/Bury the light/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1b1i1z3y/obj/arm64-v8a/libswappywrapper.so	28ba915eaa8f66cd
-32	1515	7718971906496753	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	e03373c3b0731066
-1	1542	7718971906872076	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	aeccf941b1345406
-39	1604	7718971907627731	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	9783a2ee9d28fcd9
-26	1625	7718971907882946	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	f0ef8b0cb214d173
-46	1652	7718971908153175	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	ab3099dd185c89a9
-13	1728	7718971908868794	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	dbb5a68a7d7b4489
-19	1962	7718971911145756	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	d0f564840b036093
-7	2099	7718971912672071	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	d8f856a8f153b4ff
-2099	2223	7718971913988195	E:/Unity gamez/2D/Bury the light/Bury the light/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1b1i1z3y/obj/arm64-v8a/libgame.so	e2393e2a72094ef1
+37	325	7719782651955934	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	1933642d2a783170
+326	490	7719782653657392	E:/Unity gamez/2D/Bury the light/Bury the light/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1b1i1z3y/obj/arm64-v8a/libswappywrapper.so	28ba915eaa8f66cd
+14	1212	7719782660798517	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	e03373c3b0731066
+9	1243	7719782661123799	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	aeccf941b1345406
+32	1259	7719782661283933	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	9783a2ee9d28fcd9
+18	1295	7719782661634231	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	f0ef8b0cb214d173
+27	1326	7719782661959515	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	ab3099dd185c89a9
+5	1391	7719782662605063	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	dbb5a68a7d7b4489
+22	1532	7719782664021281	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	d0f564840b036093
+0	1647	7719782665177279	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	d8f856a8f153b4ff
+1647	1766	7719782666404615	E:/Unity gamez/2D/Bury the light/Bury the light/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1b1i1z3y/obj/arm64-v8a/libgame.so	e2393e2a72094ef1

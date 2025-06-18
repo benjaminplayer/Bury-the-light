@@ -11,6 +11,7 @@ public class SceneSwitcher : MonoBehaviour, IDataPresistance
     {
         if (SceneManager.GetActiveScene().buildIndex == 0)
         {
+            Application.targetFrameRate = 60;
             DataPresistanceManager.Instance.SaveGame();
         }
     }

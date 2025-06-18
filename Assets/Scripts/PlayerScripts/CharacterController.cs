@@ -10,6 +10,7 @@ public class CharacterController : MonoBehaviour, IDataPresistance
     // TODO: Polej jump buffer,
     //       popravi animations -> probs gravity ma inpact na y velocity
     [SerializeField] private TextMeshPro debugTMP;
+    [SerializeField] private MobileInputHandler inputHandler;
 
     #region Health Logic
     [Header("Health")]
@@ -184,8 +185,20 @@ public class CharacterController : MonoBehaviour, IDataPresistance
         #endregion
 
         #region Input
-        moveInput.x = canMove ? Input.GetAxisRaw("Horizontal") : 0;
-        moveInput.y = canMove ? Input.GetAxisRaw("Vertical") : 0;
+        /*moveInput.x = canMove ? Input.GetAxisRaw("Horizontal") : 0;
+        moveInput.y = canMove ? Input.GetAxisRaw("Vertical") : 0;*/
+        moveInput = inputHandler.GetInput();
+
+
+        if (usableInTrigger != null && inputHandler.UsePressed())
+        {
+            Debug.Log("Usable pressed!");
+            _usablePressed = true;
+        }
+        else if (inputHandler.UsePressed())
+        {
+            BowAttack();
+        }
 
         if (usableInTrigger != null && Input.GetKeyDown(KeyCode.E))
         {
@@ -200,14 +213,11 @@ public class CharacterController : MonoBehaviour, IDataPresistance
 
         #endregion
 
-        #region Mobile Input
-        #endregion
-
         //Reseti is jumping -> causing wall problems
         if (moveInput.x != 0)
             CheckFacingDirection(moveInput.x > 0);
 
-        if (Input.GetKeyDown(KeyCode.Space) && canMove)
+        if ((Input.GetKeyDown(KeyCode.Space) || inputHandler.JumpPressed()) && canMove)
             OnJump();
 
         if (!IsJumping)
