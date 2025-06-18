@@ -20,9 +20,6 @@ public class SFXManager : MonoBehaviour
 
     public void PlaySFXClip(AudioClip audioClip, Transform spawn, float volume)
     {
-        Debug.Log("Instace: " + Instance);
-        Debug.Log("AudioClip:" + audioClip);
-
         AudioSource audioSource = Instantiate(soundFXObject, spawn.position, Quaternion.identity);
         activeAudioSources.Add(audioSource);
         audioSource.clip = audioClip;
