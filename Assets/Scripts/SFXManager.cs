@@ -1,7 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SFXManager : MonoBehaviour
 {
+
+    private List<AudioSource> activeAudioSources = new List<AudioSource>();
 
     public static SFXManager Instance; // singleton
 
@@ -16,8 +20,11 @@ public class SFXManager : MonoBehaviour
 
     public void PlaySFXClip(AudioClip audioClip, Transform spawn, float volume)
     {
-        AudioSource audioSource = Instantiate(soundFXObject, spawn.position, Quaternion.identity);
+        Debug.Log("Instace: " + Instance);
+        Debug.Log("AudioClip:" + audioClip);
 
+        AudioSource audioSource = Instantiate(soundFXObject, spawn.position, Quaternion.identity);
+        activeAudioSources.Add(audioSource);
         audioSource.clip = audioClip;
         audioSource.volume = volume;
         audioSource.Play();
@@ -25,7 +32,7 @@ public class SFXManager : MonoBehaviour
         float clipLen = audioSource.clip.length;
 
         Destroy(audioSource.gameObject, clipLen);
-
+        StartCoroutine(RemoveFromListAfterTime(audioSource, 1f));
     }
 
     public void PlaySFXClip(AudioClip audioClip, Transform spawn, float volume, bool loop)
@@ -36,6 +43,7 @@ public class SFXManager : MonoBehaviour
             return;
         } 
         AudioSource audioSource = Instantiate(soundFXObject, spawn.position, Quaternion.identity);
+        activeAudioSources.Add(audioSource);
 
         audioSource.clip = audioClip;
         audioSource.volume = volume;
@@ -43,4 +51,24 @@ public class SFXManager : MonoBehaviour
         audioSource.Play();
 
     }
+
+    private IEnumerator RemoveFromListAfterTime(AudioSource source, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        activeAudioSources.Remove(source);
+    }
+
+    public void StopAllAudio()
+    {
+        foreach (AudioSource source in activeAudioSources)
+        {
+            if (source != null)
+            {
+                source.Stop();
+                Destroy(source.gameObject);
+            }
+        }
+        activeAudioSources.Clear();
+    }
+
 }

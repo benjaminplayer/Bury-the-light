@@ -21,6 +21,11 @@ TagManager:
   - FollowPlayer
   - ResCam2
   - CheckTNT
+  - CollectableTMP
+  - Collectable
+  - TNT UI
+  - EndGame
+  - LevelLoader
   layers:
   - Default
   - TransparentFX

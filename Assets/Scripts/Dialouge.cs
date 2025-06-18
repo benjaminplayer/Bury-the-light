@@ -32,7 +32,7 @@ public class Dialouge : MonoBehaviour
     private string fileName;
     private string _path;
 
-    private void Awake()
+    private void OnEnable()
     {
         _path = Application.dataPath + "/Dialogue/"+fileName;
         if (!skipDialouge)
@@ -50,7 +50,7 @@ public class Dialouge : MonoBehaviour
         }
     }
 
-    public void NextLine() 
+    public void NextLine()
     {
         Debug.Log("Thy next line shall be read!");
         button.SetActive(false);

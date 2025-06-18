@@ -10,6 +10,9 @@ public class Usable : MonoBehaviour
     [SerializeField] private float _PlatformHorizontalChange;
     [SerializeField] private float _PlatformVerticalChange;
     [SerializeField] private GameObject _rocksParrent;
+    [SerializeField] private GameObject _TNTUI;
+    [SerializeField] private AudioClip explosionIgnition;
+    [SerializeField] private AudioClip explosion;
     private Transform[] _rocks;
     private Animator leverAnimator;
     private void Awake()
@@ -66,6 +69,15 @@ public class Usable : MonoBehaviour
 
     public void TriggerTNTPlace()
     {
+        StartCoroutine(HandleTNT());
+    }
+
+    private IEnumerator HandleTNT()
+    {
+        SFXManager.Instance.PlaySFXClip(explosionIgnition,transform,.8f);
+        yield return new WaitForSeconds(explosionIgnition.length);
+        SFXManager.Instance.PlaySFXClip(explosion, transform, .8f);
+
         for (int i = 1; i < _rocks.Length; i++)
         {
             _rocks[i].gameObject.layer = 8; // nastavi layer da collision ne affecta playerja
@@ -73,11 +85,13 @@ public class Usable : MonoBehaviour
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.AddForce(GetRandomVector3() * 2, ForceMode2D.Impulse);
         }
+
     }
 
     public void PickUpTNT(CharacterController cc)
     {
-        cc.hasDynamite = true;        
+        cc.hasDynamite = true;
+        _TNTUI.SetActive(true);
         gameObject.SetActive(false);
     }
 

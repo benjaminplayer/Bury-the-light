@@ -5119,8 +5119,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c56df6bac532614e882875d5e600a18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
   debugTMP: {fileID: 0}
+  health: 100
+  healthSprites:
+  - {fileID: -5373086310082204117, guid: 3325692ade25f294e9b25922b640f52e, type: 3}
+  - {fileID: -5373086310082204117, guid: 752dbb73de66e1a409d933872ce995e8, type: 3}
+  - {fileID: -5373086310082204117, guid: 576437a56444f374899577a06648ad3e, type: 3}
+  - {fileID: -5373086310082204117, guid: 774eaf9f70a49d844817ab673fe3ac22, type: 3}
+  healthBar: {fileID: 0}
+  _secretsTMP: {fileID: 0}
+  secretsFound: 0
   moveSpeed: 10
   acceleration: 3.4
   decceleration: 5.98
@@ -5146,6 +5154,7 @@ MonoBehaviour:
   canMove: 1
   isOnPlatform: 0
   platRB: {fileID: 0}
+  hasDynamite: 0
   _groundCheckPoint: {fileID: 2544728145794237327}
   _groundCheckSize: {x: 0.49, y: 0.03}
   _rightWallCheck: {fileID: 5064230245582666257}

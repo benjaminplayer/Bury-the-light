@@ -2,103 +2,47 @@ using UnityEngine;
 using System.IO;
 using System;
 using System.Collections;
+using TMPro;
 
-public class Collectables : MonoBehaviour
+public class Collectables : MonoBehaviour, IDataPresistance
 {
+    [SerializeField] private string id;
+    private bool collected = false;
 
-    [SerializeField]
-    private BoxCollider2D boxCollider;
-
-    private String[] initialData = { "#Total Secrets Found", "f: 0", "", "#Secrets per Chapter:", "Ch1: 0", "Ch2: 0" };
-    private void Awake()
+    [ContextMenu("Generate GUID")]
+    private void GenerateGUID()
     { 
-        boxCollider = GetComponent<BoxCollider2D>();
+        id = System.Guid.NewGuid().ToString(); // naredi nov GUID da lahko shrani katere collctables smo shranili
+    }
 
-        string path = Application.dataPath + "/Data/Secrets.txt";
-        if (!File.Exists(path)) // preveri, ali je bila datoteka izbrisana
-        {
-            File.Create(path).Dispose();
-            
-            StreamWriter sw = new StreamWriter(path);
-            
-            foreach (string s in initialData)
-            {
-                sw.Write(s);
-            }
-            sw.Close();
-            sw.Dispose();
-        }
+    private void Awake()
+    {
 
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void SaveData(ref GameData data)
     {
-        if (collision.CompareTag("Player"))
+
+        if (data.fragmentsCollected.ContainsKey(id))
         {
-            HandlePickup();
+            data.fragmentsCollected.Remove(id);
         }
+
+        data.fragmentsCollected.Add(id,collected);
+
     }
 
-    private void WriteToFile(ArrayList data) 
+    public void LoadData(GameData data) 
     {
-        string path = Application.dataPath + "/Data/Secrets.txt";
-
-        StreamWriter sw = new StreamWriter(path);
-
-        foreach (string s in data)
+        if (collected)
         { 
-            sw.WriteLine(s);
+            this.gameObject.SetActive(false);
         }
-
-        sw.Close();
-        sw.Dispose();
-        
     }
 
-    private ArrayList ReadFromFile(string path) 
+    public void SetCollected(bool b)
     {
-        ArrayList data = new ArrayList();
-        if (!File.Exists(path))
-        {
-            throw new System.Exception("The file \"" +path+ "\" does not exist!");
-        }
-
-        StreamReader sr = new StreamReader(path);
-        string line;
-
-        while ((line = sr.ReadLine()) != null)
-        { 
-            data.Add(line);
-        }
-
-        sr.Close();
-        sr.Dispose();
-
-        return data;
-    }
-
-    private void HandlePickup() 
-    {
-        gameObject.SetActive(false);
-        int collected;
-        ArrayList data = ReadFromFile(Application.dataPath + "/Data/Secrets.txt");
-
-        for(int i = 0; i < data.Count; i++)
-        {
-            string s = data[i].ToString();
-
-            if (s.Contains("#")) continue;
-            if (s.Contains("f:"))
-            {
-                Debug.Log(s);
-                collected = Int32.Parse(s.Substring(s.IndexOf(':') + 2, 1));
-                collected++;
-
-                data[i] = "f: " + collected;
-            }
-        }
-
-        WriteToFile(data);
+        collected = b;        
     }
 
 }

@@ -2,15 +2,28 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class CharacterController : MonoBehaviour
+public class CharacterController : MonoBehaviour, IDataPresistance
 {
     // TODO: Polej jump buffer,
     //       popravi animations -> probs gravity ma inpact na y velocity
-
-    public int health = 100;
-
     [SerializeField] private TextMeshPro debugTMP;
+
+    #region Health Logic
+    [Header("Health")]
+    public int health = 100;
+    [SerializeField] private Sprite[] healthSprites;
+    [SerializeField] private Sprite deathSprite;
+    [SerializeField] private Image healthBar;
+    #endregion
+
+    #region Secrets
+    [Header("Secrets Config")]
+    [SerializeField] private TextMeshProUGUI _secretsTMP;
+    public int secretsFound = 0;
+    #endregion
 
     #region Action Values
     [Header("Action Values")]
@@ -124,6 +137,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private AudioClip jumpSFX;
     [SerializeField] private AudioClip hurt;
     [SerializeField] private AudioClip bowPull;
+    [SerializeField] private AudioClip deathSFX;
     #endregion
 
     private Rigidbody2D rb;
@@ -131,11 +145,12 @@ public class CharacterController : MonoBehaviour
     private Collider2D platformHit;
 
     private bool _Resetable;
-
+    private int initialSecrets;
 
     private void Awake()
     {
         startPos();
+        _secretsTMP = GameObject.FindGameObjectsWithTag("CollectableTMP")[0].GetComponent<TextMeshProUGUI>(); // dobi tmp component 
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         particleSystem.enableEmission = false;
@@ -255,7 +270,7 @@ public class CharacterController : MonoBehaviour
             IsJumping = true;
             _isJumpCut = false;
             IsWallJumping = false;
-            SFXManager.Instance.PlaySFXClip(jumpSFX, transform, 1f);
+            SFXManager.Instance.PlaySFXClip(jumpSFX, transform, .8f);
             jump();
         }
         else if (CanWallJump() && LastJumpTime > 0)
@@ -360,19 +375,6 @@ public class CharacterController : MonoBehaviour
         new DebugItem<bool>("Usable pressed", _usablePressed);
     }
 
-    public void HandleMobileInput(GameObject button)
-    {
-        if (button.name.Equals("MoveLeft"))
-        { 
-            moveInput.x = -1;
-            Debug.Log("MoveLeft");
-        }
-        else if (button.name.Equals("MoveRight"))
-            moveInput.x = 1;
-
-        //Debug.Log("Button pressed: " + button.name);
-    }
-
     private void Run(float lerpAmount)
     {
         Vector2 platVel = Vector2.zero;
@@ -458,6 +460,14 @@ public class CharacterController : MonoBehaviour
     public void setGravityScale(float newScale)
     {
         rb.gravityScale = newScale;
+    }
+
+    private void HandleCollectablePickup(GameObject collectable)
+    {
+        secretsFound++;
+        _secretsTMP.SetText(secretsFound+"");
+        DataPresistanceManager.Instance.SaveGame();
+        Destroy(collectable);
     }
 
     #region Jump check methods
@@ -638,6 +648,8 @@ public class CharacterController : MonoBehaviour
 
     public void OnHit()
     {
+        health -= 25;
+        HandleHealthSpriteChange();
         SFXManager.Instance.PlaySFXClip(hurt,this.transform,1f);
         animator.Play("Fall");
         canMove = false;
@@ -647,10 +659,46 @@ public class CharacterController : MonoBehaviour
 
     }
 
+    private void HandleHealthSpriteChange()
+    {
+        switch (health)
+        {
+            case 75:
+                healthBar.sprite = healthSprites[1];
+                break;
+            case 50:
+                healthBar.sprite = healthSprites[2];
+                break;
+            case 25:
+                healthBar.sprite = healthSprites[3];
+                break;
+            case 0:
+                handleDeath();
+                break;
+            default:
+                healthBar.sprite = healthSprites[0];
+                break;
+        }
+    }
+
     private void handleDeath()
     {
         animator.SetTrigger("isHurt");
+        rb.linearVelocity = Vector2.zero;
         _isAlive = false;
+        StartCoroutine(Death());
+    }
+
+    private IEnumerator Death()
+    {
+        animator.enabled = false;
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        sr.sprite = deathSprite;
+        SFXManager.Instance.PlaySFXClip(deathSFX,this.transform,.5f);
+        yield return new WaitForSeconds(deathSFX.length);
+        secretsFound = initialSecrets;
+        DataPresistanceManager.Instance.SaveGame();
+        GameObject.FindGameObjectsWithTag("LevelLoader")[0].GetComponent<SceneSwitcher>().LoadLevel(SceneManager.GetActiveScene().buildIndex);
 
     }
 
@@ -675,6 +723,21 @@ public class CharacterController : MonoBehaviour
         while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f) // ce je normalized time 1 pomeni da je animacija koncala
             yield return null;
         resetMovementAfterHit();
+    }
+    #endregion
+
+    #region Save and load data
+    public void LoadData(GameData data)
+    {
+        this.secretsFound = data.secretsFound;
+        this.initialSecrets = data.secretsFound;
+        Debug.Log("Loaded data: " + secretsFound);
+        _secretsTMP.SetText(secretsFound + "");
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.secretsFound = this.secretsFound;
     }
     #endregion
 
@@ -715,6 +778,9 @@ public class CharacterController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.CompareTag("Collectable"))
+            HandleCollectablePickup(collision.gameObject);
+
         if (collision.CompareTag("ResetCamMovement"))
         {
             CameraController cc = Camera.main.GetComponent<CameraController>();
@@ -760,11 +826,7 @@ public class CharacterController : MonoBehaviour
         if (collision.CompareTag("ResCam2"))
         {
             CameraController cc = Camera.main.GetComponent<CameraController>();
-            cc.SetFollowCam(false);
-            StartCoroutine(cc.moveCamera(Camera.main.transform.position, new Vector3(36f, 5f, Camera.main.transform.position.z), 1f));
             StartCoroutine(cc.ZoomCamera(cc.GetCameraOrtSize(), 1f));
-            CameraController.IsEndOfLevel = false;
-            _Resetable = false;
         }
 
         if (collision.CompareTag("CheckTNT"))
@@ -805,7 +867,7 @@ public class CharacterController : MonoBehaviour
             if (collision.CompareTag("PickUpTNT"))
             {
                 Debug.Log("PickupTNT");
-                us.PickUpTNT(this.GetComponent<CharacterController>());
+                us.PickUpTNT(this);
             }
 
             if (collision.CompareTag("Destroyable"))

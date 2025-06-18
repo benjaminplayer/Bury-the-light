@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2687791917881655457}
   - component: {fileID: 2308900305600598375}
-  - component: {fileID: 844235960966797437}
+  - component: {fileID: 8219465044922721504}
   m_Layer: 0
   m_Name: Collectable
-  m_TagString: Untagged
+  m_TagString: Collectable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -80,7 +80,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &844235960966797437
+--- !u!114 &8219465044922721504
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a03c2ca806b05d46ab79abc8947a813, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 0}
+  id: 
 --- !u!1 &5085035639282621220
 GameObject:
   m_ObjectHideFlags: 0

@@ -138,6 +138,7 @@ public class CameraController : MonoBehaviour
 
             if (collision.IsTouching(BottomCollider))
             {
+                collision.GetComponent<CharacterController>().OnHit();
                 collision.gameObject.transform.position = entryPos;
             }
 
