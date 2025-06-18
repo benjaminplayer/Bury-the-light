@@ -1,0 +1,1 @@
+E:\Unity gamez\2D\Bury the light\Bury the light\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\1b1i1z3y\obj\arm64-v8a

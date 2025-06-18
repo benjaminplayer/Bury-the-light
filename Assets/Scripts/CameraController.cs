@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Collider2D BottomCollider;
     [SerializeField] private Collider2D TopCollider;
     #endregion
-    
+
     [Header("Other values")]
     public Vector2 entryPos;
     [SerializeField] private bool _useStartPos = true;
@@ -53,22 +53,14 @@ public class CameraController : MonoBehaviour
     public static bool IsEndOfLevel = false;
 
     private void Awake()
-    {        
+    {
         cam = this.GetComponent<Camera>();
 
         camOffset = new Vector3(camOffsetX, camOffsetY);
         useStartPos(_useStartPos);
 
-        //nastavi scale kamere glede na resolution mobilne naprave
-        ascpet = (float)Screen.width / Screen.height;
-        newSize = (tilesCount / ascpet) / 2f;
-
-        //nastavi move offset za premik
-        cameraHeight = cam.orthographicSize * 2f;
-        cam.orthographicSize = newSize;
-        cameraWidth = cameraHeight * Screen.width / Screen.height;
-        moveOffset = cameraWidth;
-
+        //OldSetup();
+        SetupCam();
     }
 
     private void Start()
@@ -93,9 +85,9 @@ public class CameraController : MonoBehaviour
         }
 
         if (FollowPlayerX)
-        { 
+        {
             Vector2 pos = player.transform.position;
-            transform.position = new Vector3(pos.x, transform.position.y, -.3f); 
+            transform.position = new Vector3(pos.x, transform.position.y, -.3f);
         }
 
     }
@@ -113,7 +105,7 @@ public class CameraController : MonoBehaviour
             if (collision.IsTouching(LeftCollider))
             {
                 if (IsEndOfLevel)
-                { 
+                {
                     IsEndOfLevel = false;
                 }
 
@@ -153,6 +145,54 @@ public class CameraController : MonoBehaviour
 
     }
 
+    private void OldSetup()
+    {
+        //nastavi scale kamere glede na resolution mobilne naprave
+        ascpet = (float)Screen.width / Screen.height;
+        newSize = (tilesCount / ascpet) / 2f;
+
+        //nastavi move offset za premik
+        cam.orthographicSize = newSize;
+        cameraHeight = cam.orthographicSize * 2f;
+        cameraWidth = cameraHeight * Screen.width / Screen.height;
+        moveOffset = 36;
+    }
+
+    private void SetupCam()
+    {
+        cam = Camera.main;
+        float groundY;
+        float targetTilesWidth = 36f;
+
+        float aspect = (float)Screen.width / Screen.height;
+
+        // Set orthographic size to ensure 36 tiles horizontally
+        newSize = (targetTilesWidth / aspect) / 2f;
+        cam.orthographicSize = newSize;
+
+        // Update camera dimensions
+        cameraHeight = cam.orthographicSize * 2f;
+        cameraWidth = targetTilesWidth; // Always 36
+
+        // DO NOT hardcode camera position if you want it to move later
+        // Only reposition if _useStartPos is false and you need default grounding
+
+        if (!_useStartPos)
+        {
+            if (SceneManager.GetActiveScene().name == "CavernLevel")
+                groundY = -5f; // use your actual Grid Y
+            else
+                groundY = -(13.64f + 5.25f);
+            Vector3 pos = cam.transform.position;
+            pos.y = groundY + cam.orthographicSize;
+            cam.transform.position = pos;
+        }
+
+        // Optional: update moveOffset to move camera 1 screen width at a time
+        moveOffset = 36;
+    }
+
+
     private bool CheckCameraMove(Collider2D collision)
     {
         if (collision.IsTouching(RightCollider))
@@ -161,12 +201,12 @@ public class CameraController : MonoBehaviour
             boxSize = RightCollider.bounds.size;
         }
         else
-        { 
+        {
             boxCenter = LeftCollider.bounds.center - new Vector3(.25f, 0);
             boxSize = LeftCollider.bounds.size;
         }
-        
-        Collider2D hit = Physics2D.OverlapBox(boxCenter, boxSize,0f, LayerMask.GetMask("Player"));
+
+        Collider2D hit = Physics2D.OverlapBox(boxCenter, boxSize, 0f, LayerMask.GetMask("Player"));
 
         return hit == null; // returna ali je player v boxu in nulla vrednost
     }
@@ -185,7 +225,7 @@ public class CameraController : MonoBehaviour
         StartCoroutine(moveCamera(this.transform.position, endPos, duration));
     }
 
-    private void MoveCameraUp() 
+    private void MoveCameraUp()
     {
         Vector3 endPos = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y + cameraHeight, Camera.main.transform.position.z);
         StartCoroutine(moveCamera(Camera.main.transform.position, endPos, duration));
@@ -211,17 +251,17 @@ public class CameraController : MonoBehaviour
     {
         SceneManager.LoadScene("CavernLevel");
     }
-    private void useStartPos(bool useStartPos) 
+    private void useStartPos(bool useStartPos)
     {
         if (useStartPos)
         {
-            if (startPos.Equals(new Vector3(0,0,0)))
+            if (startPos.Equals(new Vector3(0, 0, 0)))
                 Camera.main.transform.position = new Vector3(-29.77f, -9.538046f, -9.981132f);
             else
                 transform.position = startPos;
         }
     }
-
+    #region Setter and Getter Methods
     public void SetFollowCam(bool b)
     {
         if (FollowPlayerX && b)
@@ -230,7 +270,7 @@ public class CameraController : MonoBehaviour
 
     }
 
-    public void SetFollowCamX(bool b) 
+    public void SetFollowCamX(bool b)
     {
         if (FollowPlayer && b)
             FollowPlayer = false;
@@ -238,7 +278,7 @@ public class CameraController : MonoBehaviour
         FollowPlayerX = b;
     }
 
-    public void SetOffsetY(float camOffsetY) 
+    public void SetOffsetY(float camOffsetY)
     {
         this.camOffsetY = camOffsetY;
     }
@@ -247,8 +287,8 @@ public class CameraController : MonoBehaviour
     {
         return this.newSize;
     }
-
-    public IEnumerator ZoomCamera(float newSize, float duration) 
+    #endregion
+    public IEnumerator ZoomCamera(float newSize, float duration)
     {
         float startSize = Camera.main.orthographicSize;
         float elapsedTime = 0f;
