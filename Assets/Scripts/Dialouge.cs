@@ -9,7 +9,7 @@ public class Dialouge : MonoBehaviour
 
     public GameObject dialoguePanel;
     public TextMeshProUGUI dialougeText;
-    //public string[] dialouge;
+
     public ArrayList dialouge = new ArrayList();
     private ArrayList waitIdx = new ArrayList();
     private int index;
@@ -30,24 +30,38 @@ public class Dialouge : MonoBehaviour
     
     [SerializeField]
     private string fileName;
-    private string _path;
 
     private void OnEnable()
     {
-        _path = Application.dataPath + "/Dialogue/"+fileName;
+        //_path = Application.dataPath + "/Dialogue/"+fileName;
+        TextAsset textAsset = Resources.Load<TextAsset>("Dialogues/"+fileName);
+        string content = textAsset.text;
+
+        ConvertToArrayList(content);
+
         if (!skipDialouge)
         {
             HealthBar.SetActive(false);
             dialoguePanel.SetActive(true);
             playerAnimator = player.GetComponent<Animator>();
             fillWaitIndexes(waitIndexes);
-            readFromFile();
             StartCoroutine(Typing());
         }
         else
         { 
             dialoguePanel.SetActive(false);
         }
+    }
+
+    private void ConvertToArrayList(string data)
+    {
+        string[] parts = data.Split(new[] { "\r\n" }, StringSplitOptions.None); // splitta string na new line characters \n -> new line (10) \r -> carriage return (13)
+
+        foreach (string s in parts)
+        {
+            dialouge.Add(s);
+        }
+
     }
 
     public void NextLine()
@@ -106,30 +120,6 @@ public class Dialouge : MonoBehaviour
     { 
         yield return new WaitForSeconds(duration);
         StartCoroutine(Typing());
-    }
-
-    private void readFromFile()
-    {
-        Debug.Log(Application.dataPath + "/Dialogue/IntroDialogue.txt");
-        Debug.Log("Path aquired:" + _path);
-        //StreamReader sr = new StreamReader(Application.dataPath + "/Dialogue/IntroDialogue.txt");
-        StreamReader sr = new StreamReader(_path);
-        try
-        {
-            string line;
-
-            while ((line = sr.ReadLine()) != null)
-            { 
-                dialouge.Add(line); 
-            }
-
-            sr.Close();
-            sr.Dispose();
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
     }
 
     private void fillWaitIndexes(int[] indexes)
