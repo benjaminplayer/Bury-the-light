@@ -5120,6 +5120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugTMP: {fileID: 0}
+  inputHandler: {fileID: 0}
   health: 100
   healthSprites:
   - {fileID: -5373086310082204117, guid: 3325692ade25f294e9b25922b640f52e, type: 3}
