@@ -13,6 +13,7 @@ public class Usable : MonoBehaviour
     [SerializeField] private GameObject _TNTUI;
     [SerializeField] private AudioClip explosionIgnition;
     [SerializeField] private AudioClip explosion;
+    [SerializeField] private ParticleSystem explosionSystem;
     private Transform[] _rocks;
     private Animator leverAnimator;
     private void Awake()
@@ -27,8 +28,6 @@ public class Usable : MonoBehaviour
                 leverAnimator.Play("Idle");
             }
         }
-
-
     }
 
     private void Start()
@@ -77,6 +76,7 @@ public class Usable : MonoBehaviour
         SFXManager.Instance.PlaySFXClip(explosionIgnition,transform,.8f);
         yield return new WaitForSeconds(explosionIgnition.length);
         SFXManager.Instance.PlaySFXClip(explosion, transform, .8f);
+        explosionSystem.Play();
 
         for (int i = 1; i < _rocks.Length; i++)
         {

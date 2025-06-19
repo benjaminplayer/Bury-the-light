@@ -8,6 +8,17 @@ public class Arrow : MonoBehaviour
     [SerializeField] private Sprite _sprite;
     [SerializeField] private float speed = 30f;
     private GameObject spriteGO;
+    private float timer = 0f;
+
+    private void Update()
+    {
+        timer += Time.deltaTime;
+
+        // destroying redundand obj
+        if (timer > 15)
+            Destroy(this.gameObject);
+    }
+
     public void Initialize(Vector3 spawnLoc, bool moveDir)
     {
         spriteGO = new GameObject("arrowSprite");
@@ -53,7 +64,7 @@ public class Arrow : MonoBehaviour
     {
         if (collision.CompareTag("Player")) return;
 
-        if (collision.CompareTag("Wall"))
+        if (collision.CompareTag("Wall") || collision.gameObject.layer == 6)
         {
             StopAllCoroutines();                   // Stop the movement
             Debug.Log("Arrow hit the wall — stopped.");
@@ -65,20 +76,19 @@ public class Arrow : MonoBehaviour
             // Optional: Disable the collider to prevent future triggers
             GetComponent<Collider2D>().enabled = false;
             transform.SetParent(collision.transform);
+
             return;
         }
 
-
-        // Otherwise, destroy arrow (e.g., hits enemy)
-        StopAllCoroutines();
-
         if (collision.CompareTag("Enemy"))
-        {
-            //HandleEnemyHit(collision.gameObject);
+        { 
+            Destroy(this.gameObject);
+            return;
         }
 
-        this.gameObject.SetActive(false);
-        Destroy(this.gameObject);
+        if (collision.name == "LeftCollider" || collision.name == "RightCollider")
+            Destroy(this.gameObject);
+
     }
 
     private void HandleEnemyHit(GameObject enemy)

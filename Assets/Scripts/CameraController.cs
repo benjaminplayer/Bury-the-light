@@ -209,7 +209,7 @@ public class CameraController : MonoBehaviour
 
     private void SwitchScenes()
     {
-        SceneManager.LoadScene("CavernLevel");
+        GameObject.FindGameObjectsWithTag("LevelLoader")[0].GetComponent<SceneSwitcher>().LoadLevel(2);
     }
     private void useStartPos(bool useStartPos) 
     {
