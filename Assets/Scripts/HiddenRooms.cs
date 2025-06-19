@@ -52,8 +52,6 @@ public class HiddenRooms : MonoBehaviour
         if (collision.tag.Equals("Player"))
         { 
             StartCoroutine(FadeWall(0, 1f, 0.1f));
-            if (hasCollectable)
-                collectable.SetActive(false);
         }
     }
 
